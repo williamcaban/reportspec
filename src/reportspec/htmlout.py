@@ -87,7 +87,7 @@ section.evidence .credits{font-size:11px;color:var(--muted)}
 PAGE = Environment(autoescape=select_autoescape(default=True)).from_string("""<!doctype html>
 <html lang="{{ lang }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{{ title }}</title>{% if authors %}<meta name="author" content="{{ authors | join(', ') }}">{% endif %}
-<meta name="generator" content="reportspec reference implementation (v1alpha1 DRAFT)">
+<meta name="generator" content="reportspec proof of concept (v1alpha1)">
 <style>{{ css }}</style></head>
 <body><main class="report">
 <header class="cover"><h1>{{ title }}</h1>{% if subtitle %}<p class="subtitle">{{ subtitle }}</p>{% endif %}

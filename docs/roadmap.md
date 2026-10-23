@@ -1,6 +1,6 @@
 # Roadmap
 
-ReportSpec is v1alpha1, a draft, and has no release yet. This page lists what is planned, what has been checked, and where to find the open questions and the chart quality requirements. Nothing here is a commitment to a date.
+ReportSpec is a proof of concept (POC) at v1alpha1: not final, not adopted by EvalHub or ASAGO, and without a release. This page lists what is planned, what has been checked, and where to find the open questions and the chart quality requirements. Nothing here is a commitment to a date.
 
 ## Planned
 

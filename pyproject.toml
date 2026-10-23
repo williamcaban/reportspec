@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "reportspec"
 dynamic = ["version"]
-description = "Portable Markdown report templates for evaluation evidence: validate, bundle and render to Markdown, JSON, HTML, PDF and DOCX"
+description = "Proof of concept: portable Markdown report templates for evaluation evidence: validate, bundle and render to Markdown, JSON, HTML, PDF and DOCX"
 readme = "README.md"
 requires-python = ">=3.13"
 license = "Apache-2.0"

@@ -1,6 +1,6 @@
 # Status, verification and open questions
 
-ReportSpec is v1alpha1, a draft. This page records what has been checked and what is still undecided.
+ReportSpec is a v1alpha1 proof of concept (POC), not a final or adopted design. This page records what has been checked and what is still undecided.
 
 ## Verified on 2026-10-23
 

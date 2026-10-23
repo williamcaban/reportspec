@@ -19,7 +19,7 @@ The binding-level display hint is called `display` so it can't be confused with 
 
 ## Template language (restricted Jinja-like subset)
 
-The spec defines the subset itself and does not say "Jinja2", so it stays a documented contract and not a side effect of one library. The reference implementation is Python 3.13+ on Jinja2's sandbox, with an AST allowlist that enforces the subset.
+The spec defines the subset itself and does not say "Jinja2", so it stays a documented contract and not a side effect of one library. The proof-of-concept implementation is Python 3.13+ on Jinja2's sandbox, with an AST allowlist that enforces the subset.
 
 | Allowed | Not allowed |
 |---|---|
@@ -64,6 +64,6 @@ Fenced code blocks with the info string `reportspec-viz`, whose YAML body is val
 | `table` | table | `columns[]`, `sort_by`, `status_field` + `status_pass_when` (set `false` for fields where true is bad, like `attack_succeeded`), `sortable` |
 | `summary_cards` | none; each card's `value` is a scalar | `cards[] {label, value, display, precision, threshold, direction}` |
 
-Resolution and drawing are separate. The host resolves a block against the bundle into a [resolved payload](../src/reportspec/schemas/resolved-viz-v1alpha1.schema.json) (plain JSON, values and text already formatted, verdict inputs already evaluated), and a chart renderer turns that payload into SVG. The reference renderer builds Vega-Lite specs with Altair for `bar`, `line`, `heatmap` and `boxplot`, and Vega specs for `radar` and `radial`, all rendered through `vl-convert` with external data loading disabled. A host can swap the renderer without touching a template. What a figure must look like is [VISUAL-QA.md](../VISUAL-QA.md). Every chart adds a figure number, a caption note (threshold, direction, N/A count) and generated alt text.
+Resolution and drawing are separate. The host resolves a block against the bundle into a [resolved payload](../src/reportspec/schemas/resolved-viz-v1alpha1.schema.json) (plain JSON, values and text already formatted, verdict inputs already evaluated), and a chart renderer turns that payload into SVG. The proof-of-concept renderer builds Vega-Lite specs with Altair for `bar`, `line`, `heatmap` and `boxplot`, and Vega specs for `radar` and `radial`, all rendered through `vl-convert` with external data loading disabled. A host can swap the renderer without touching a template. What a figure must look like is [VISUAL-QA.md](../VISUAL-QA.md). Every chart adds a figure number, a caption note (threshold, direction, N/A count) and generated alt text.
 
 Rules: no template syntax inside a fence; no colors (`palette` states intent, the renderer owns colors); thresholds are a literal, `{param: x}` or `{binding: x}`; a block may sit inside `{% if %}` but not inside `{% for %}`; `format.markdown.viz: table` renders each block as a GFM table for CI and PR comments.

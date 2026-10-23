@@ -2,7 +2,7 @@
 
 Policy: every font is open (SIL OFL or similar) and either ships in Linux distributions or is vendored
 here. Output must not depend on what the machine has installed (VISUAL-QA.md, VQA-13 and VQA-20), so the
-reference renderer embeds Red Hat Text and Red Hat Mono from fonts/ and names only open, widely packaged
+proof-of-concept renderer embeds Red Hat Text and Red Hat Mono from fonts/ and names only open, widely packaged
 fonts as fallbacks. Helvetica, Arial and other proprietary families are never named.
 
 The font files are embedded byte for byte. Red Hat's license carries a Reserved Font Name, which forbids

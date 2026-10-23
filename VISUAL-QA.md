@@ -25,7 +25,7 @@ These three are permanent regression cases (see "Regression cases"). The first f
 
 ## Implementation status (2026-10-23)
 
-The reference renderer ([`charts.py`](src/reportspec/charts.py), [`htmlout.py`](src/reportspec/htmlout.py)) was reviewed by rendering the showcase report to PDF and HTML and looking at every page (layer H). Layers A and G are not built yet; conformance cases 30 to 32 cover parts of VQA-3, VQA-9, VQA-15, VQA-16 and VQA-18.
+The proof-of-concept renderer ([`charts.py`](src/reportspec/charts.py), [`htmlout.py`](src/reportspec/htmlout.py)) was reviewed by rendering the showcase report to PDF and HTML and looking at every page (layer H). Layers A and G are not built yet; conformance cases 30 to 32 cover parts of VQA-3, VQA-9, VQA-15, VQA-16 and VQA-18.
 
 | Requirement | State |
 |---|---|
@@ -91,7 +91,7 @@ Each requirement is checked at one or more layers: **A** automated check, **G** 
 
 | Layer | What | Where it runs | Gate |
 |---|---|---|---|
-| **A. Automated checks** | Rules over the payload, SVG and PDF: N/A count equals N/A marks, no forbidden elements, text bounds inside the viewBox, contrast of theme tokens, fonts embedded (`pdffonts`), chart text present (`pdftotext`), data parity | Unit tests in the reference implementation | Every change |
+| **A. Automated checks** | Rules over the payload, SVG and PDF: N/A count equals N/A marks, no forbidden elements, text bounds inside the viewBox, contrast of theme tokens, fonts embedded (`pdffonts`), chart text present (`pdftotext`), data parity | Unit tests in the proof-of-concept implementation | Every change |
 | **G. Golden images** | One PNG per figure per case, compared pixel by pixel with a small tolerance (anti-aliasing). Goldens are generated and compared only inside the pinned render image | CI, in the container | Every change that touches a chart or the theme |
 | **H. Human review** | A reviewer looks at the rendered pages against the checklist below and records it | When a chart type is added, or its geometry changes | Before a chart type ships |
 

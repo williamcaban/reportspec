@@ -1,4 +1,4 @@
-"""Command line for the ReportSpec reference implementation."""
+"""Command line for the ReportSpec proof-of-concept implementation."""
 
 from __future__ import annotations
 
