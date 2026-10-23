@@ -25,7 +25,7 @@ These three are permanent regression cases (see "Regression cases"). The first f
 
 ## Implementation status (2026-10-23)
 
-The reference renderer ([`reportspec_charts.py`](reportspec_charts.py), [`reportspec_html.py`](reportspec_html.py)) was reviewed by rendering the showcase report to PDF and HTML and looking at every page (layer H). Layers A and G are not built yet; conformance cases 30 to 32 cover parts of VQA-3, VQA-9, VQA-15, VQA-16 and VQA-18.
+The reference renderer ([`charts.py`](src/reportspec/charts.py), [`htmlout.py`](src/reportspec/htmlout.py)) was reviewed by rendering the showcase report to PDF and HTML and looking at every page (layer H). Layers A and G are not built yet; conformance cases 30 to 32 cover parts of VQA-3, VQA-9, VQA-15, VQA-16 and VQA-18.
 
 | Requirement | State |
 |---|---|
@@ -67,7 +67,7 @@ Each requirement is checked at one or more layers: **A** automated check, **G** 
 |---|---|---|
 | VQA-11 | **No split figures.** A figure and its caption never break across pages. A heading is never the last line on a page. Table headers repeat on each page. Must | G, H |
 | VQA-12 | **Fits the page.** Figures fit the content width at Letter and A4, portrait. Wide matrices scale or wrap, never overflow. Must | A, G |
-| VQA-13 | **Open fonts, embedded.** Every font in the PDF is embedded and open: Red Hat Text and Red Hat Mono, vendored in `fonts/` and embedded byte for byte (the Reserved Font Name forbids subsetting). No proprietary family (Helvetica, Arial, Menlo, Calibri) appears in the PDF or in an HTML font stack. No missing-glyph boxes for Latin; a defined fallback for CJK. Must | A |
+| VQA-13 | **Open fonts, embedded.** Every font in the PDF is embedded and open: Red Hat Text and Red Hat Mono, vendored in `src/reportspec/fonts/` and embedded byte for byte (the Reserved Font Name forbids subsetting). No proprietary family (Helvetica, Arial, Menlo, Calibri) appears in the PDF or in an HTML font stack. No missing-glyph boxes for Latin; a defined fallback for CJK. Must | A |
 | VQA-14 | **Grayscale print.** The report is legible printed in grayscale, with no dependence on background colors. Should | H |
 
 ### Data robustness

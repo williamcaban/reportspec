@@ -8,7 +8,7 @@
 #   podman run --rm reportspec conformance conformance
 #
 # Fonts: the image installs only the fallback families (Liberation, DejaVu). Red Hat Text and Red Hat Mono come
-# from fonts/ and are embedded byte for byte. Fedora's redhat-text-fonts / redhat-mono-fonts packages are NOT
+# from src/reportspec/fonts/ and are embedded byte for byte. Fedora's redhat-text-fonts / redhat-mono-fonts packages are NOT
 # installed on purpose: they are the same font version (1.030) but OTF files, so with both present the family name
 # "Red Hat Text" would resolve to two different files and break determinism (VISUAL-QA.md, VQA-13 and VQA-20).
 
@@ -26,16 +26,14 @@ RUN dnf -y install --setopt=install_weak_deps=False \
 WORKDIR /opt/app-root/reportspec
 COPY --chown=1001:0 . .
 
-# Build a virtualenv from reportspec.py.lock with hash checking (--locked fails if the lock and the script disagree).
-# uv is a build-time tool only: the entrypoint is plain python, so the container runs offline with a read-only root.
-ENV UV_PYTHON_DOWNLOADS=never UV_PYTHON_PREFERENCE=only-system UV_CACHE_DIR=/tmp/uv-cache
+# Install the locked dependencies (hash-checked, uv.lock) and the package itself into a virtualenv.
+# uv is a build-time tool only: the entrypoint is the installed command, so the container runs offline with a read-only root.
+ENV UV_PYTHON_DOWNLOADS=never UV_PYTHON_PREFERENCE=only-system UV_CACHE_DIR=/tmp/uv-cache UV_PROJECT_ENVIRONMENT=/opt/app-root/venv
 USER 1001
-RUN uv export --script reportspec.py --locked --format requirements-txt --no-header -o /tmp/requirements.txt \
-    && uv venv --python python3 /opt/app-root/venv \
-    && uv pip install --python /opt/app-root/venv/bin/python --require-hashes --no-deps -r /tmp/requirements.txt \
-    && rm -rf /tmp/requirements.txt /tmp/uv-cache \
+RUN uv sync --frozen --no-dev --no-editable \
+    && rm -rf /tmp/uv-cache \
     && chmod -R g=u /opt/app-root/venv /opt/app-root/reportspec   # OpenShift runs an arbitrary uid in group 0
 
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1
-ENTRYPOINT ["/opt/app-root/venv/bin/python", "reportspec.py"]
+ENTRYPOINT ["/opt/app-root/venv/bin/reportspec"]
 CMD ["--help"]

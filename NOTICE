@@ -4,14 +4,14 @@ Copyright 2026 William Caban
 Licensed under the Apache License, Version 2.0 (see LICENSE), except for the third-party material below,
 which keeps its own license.
 
-Fonts (fonts/)
+Fonts (src/reportspec/fonts/)
   Red Hat Text and Red Hat Mono, Version 1.030, from https://github.com/RedHatOfficial/RedHatFont
   (commit 6bb1048a6402b0076ea04f42951ec66263cd1437). SIL Open Font License 1.1 with Reserved Font Name
-  "Red Hat". See fonts/LICENSE and fonts/OFL.txt. The files are redistributed unmodified.
+  "Red Hat". See src/reportspec/fonts/LICENSE and OFL.txt there. The files are redistributed unmodified.
 
-Icons (icons/)
+Icons (src/reportspec/icons/)
   circle-check.svg and circle-xmark.svg from Font Awesome Free 7.3.1 (https://fontawesome.com),
-  licensed CC BY 4.0. See icons/LICENSE.txt. Every HTML and PDF report prints this attribution.
+  licensed CC BY 4.0. See src/reportspec/icons/LICENSE.txt. Every HTML and PDF report prints this attribution.
 
 Example inputs (examples/inputs/)
   midojo-results.json reproduces the numbers in the README of https://github.com/asago-ai/midojo

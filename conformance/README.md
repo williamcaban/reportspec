@@ -3,7 +3,7 @@
 Every implementation, whatever the host or language, must produce these outcomes. The reference implementation is Python 3.13+. Run the reference implementation with:
 
 ```bash
-uv run ../reportspec.py conformance .
+reportspec conformance .   # from a clone: uv run reportspec conformance .
 ```
 
 Each case is a directory with a `case.yaml` and usually a `spec.report.md`:
