@@ -1,6 +1,6 @@
 # ReportSpec host profile: ASAGO
 
-**Status:** DRAFT, a proposal for the ASAGO community · **Core spec:** [../README.md](../README.md) · **Related:** [ASAGO-ADR-0001](https://github.com/asago-ai/architecture-decision-records/blob/main/architecture-decision-records/ASAGO-ADR-0001-asago-server.md) (server; leaves report generation to a separate ADR)
+**Status:** DRAFT, a proposal for the ASAGO community · **Docs:** [index](../README.md) · **Implemented:** the `midojo` and `asago-risk-extraction` adapters. **Proposals, not implemented:** the API and ASAGO-ADR-0002 · **Related:** [ASAGO-ADR-0001](https://github.com/asago-ai/architecture-decision-records/blob/main/architecture-decision-records/ASAGO-ADR-0001-asago-server.md) (server; leaves report generation to a separate ADR)
 
 This profile covers how ASAGO would host ReportSpec: its adapters, an API that fits ADR-0001's stateless design, and its host namespace. Repos were checked on 2026-10-20: `midojo` 337470f, `asago-examples` b79020d, `architecture-decision-records` main.
 
@@ -14,7 +14,7 @@ ASAGO's goal is a traceable chain from policy to production: policy → risks �
 | MiDojo | Rich terminal table; `results.json`; evaluation records on the running control-plane server |
 | Garak via EvalHub | EvalHub results (and an EvalHub ReportSpec report, once that ships) |
 
-No component can produce the document a CISO or risk officer asks for: "these are the risks in our policy, this is how the agent did against them, and here is the evidence". A shared spec makes that one file ([`agent-redteam.report.md`](../examples/agent-redteam.report.md)), rendered from all three outputs.
+No component can produce the document a CISO or risk officer asks for: "these are the risks in our policy, this is how the agent did against them, and here is the evidence". A shared spec makes that one file ([`agent-redteam.report.md`](../../examples/agent-redteam.report.md)), rendered from all three outputs.
 
 ## Adapter: `midojo`
 
@@ -51,7 +51,9 @@ The Policy Mapper reports undefined precision or recall as `null` "so they can't
 
 **Subject.** A risk extraction is about a policy, not about the system under test, so this adapter sets no `subject`. The policy goes into `run.context` instead. The subject comes from whichever input evaluates the system (MiDojo's agent or EvalHub's model), or from a caller-built bundle.
 
-## API: stateless, data in and data out
+## API: stateless, data in and data out (proposal)
+
+Not implemented. The standalone `reportspec` command and, later, a FastAPI service would provide it.
 
 ADR-0001 makes the ASAGO server stateless: the caller owns orchestration and storage, and each endpoint returns versioned JSON in a light envelope. ReportSpec fits that without change. The spec and the inputs travel in the request, and the evidence manifest comes back.
 
@@ -95,4 +97,4 @@ ADR-0001 deliberately deferred this. An ADR in the existing template would cover
 - **Non-goals:** storing reports or specs (the caller owns storage); computing verdicts; a dashboard.
 - **Alternatives:** keep per-component HTML templates (no cross-component report); an ASAGO-only template language (forks authors and tooling from EvalHub); a BI tool (fails the "no transforms" and offline requirements).
 - **Security:** results are untrusted input (agent outputs, injected payloads, policy text); the template sandbox, escaping and conformance cases 05, 06 and 12 apply.
-- **Open:** where the shared spec repo lives (core open question 1), and whether MiDojo and the Policy Mapper emit bundles natively (core open question 2).
+- **Open:** where the shared spec repo lives ([open question 1](../status.md#open-questions)), and whether MiDojo and the Policy Mapper emit bundles natively ([open question 2](../status.md#open-questions)).

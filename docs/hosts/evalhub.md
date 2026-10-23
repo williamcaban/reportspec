@@ -1,6 +1,6 @@
 # ReportSpec host profile: EvalHub
 
-**Status:** DRAFT · **Core spec:** [../README.md](../README.md)
+**Status:** DRAFT · **Docs:** [index](../README.md) · **Implemented:** the `evalhub-job` adapter. **Proposals, not implemented:** the `mlflow` adapter and the API, CLI and CRD
 
 This profile covers what EvalHub adds around the portable core: its host namespace, its adapters, and its API. A spec that uses only the core renders the same on EvalHub and on ASAGO.
 
@@ -58,9 +58,11 @@ From the SDK's `adapter/mlflow.py` and `callbacks.py` on `main`:
 | Tags from job tags | `run.context.*` |
 | **No** threshold, per-benchmark pass, or collection verdict | `verdict` absent → `overall_pass` and the `evaluations` table's `pass` column print the missing marker |
 
-Recommendation: render compliance reports from the EvalHub job (the system of record for verdicts) and use MLflow for metrics and **history across runs**, which is what it's good at and what trend charts need (core open question 5). The ASAGO Policy Mapper also logs to MLflow, so one `mlflow` adapter serves both hosts.
+Recommendation: render compliance reports from the EvalHub job (the system of record for verdicts) and use MLflow for metrics and **history across runs**, which is what it's good at and what trend charts need ([open question 5](../status.md#open-questions)). The ASAGO Policy Mapper also logs to MLflow, so one `mlflow` adapter serves both hosts.
 
-## API, CLI and CRD
+## API, CLI and CRD (proposal)
+
+None of this exists in the reference implementation. It is the surface EvalHub engineering would build; the standalone `reportspec` command already covers rendering from a job JSON file.
 
 The `.md` file is the canonical, digest-able artifact; wrappers carry it unchanged.
 
@@ -90,6 +92,6 @@ CLI: `evalhub reportspec validate <file>` (offline), `evalhub report render -f <
 ## Open questions specific to EvalHub
 
 1. **Render location: decided (2026-10-23).** A standalone Python 3.13+ renderer, decoupled from the EvalHub server and shared with ASAGO: one implementation to secure instead of two. The EvalHub server does not port the template engine. How EvalHub reaches it (REST service, the SDK's `render_report`, or the CLI) is still open.
-1a. **Spec registry location.** The sketch above puts `POST /api/v1/reportspecs` and an optional CRD in the EvalHub server. With an external renderer, either the server keeps storing the YAML and passes it to the renderer with each call, or the registry moves to the renderer service. The first keeps EvalHub's RFE-2755 scope and the second matches ASAGO's stateless model.
+1a. **Spec registry location.** The sketch above puts `POST /api/v1/reportspecs` and an optional CRD in the EvalHub server. With an external renderer, either the server keeps storing the YAML and passes it to the renderer with each call, or the registry moves to the renderer service. The first keeps registry storage inside EvalHub and the second matches ASAGO's stateless model.
 2. **Direction source of truth.** Filling direction from provider config in the server adapter (recommended), or adding `lower_is_better` to `metrics_schema` so it travels with results.
 3. **Keeping breakdown data** (CIs, per-probe metadata) as `records`. This needs the SDK `report_results` change described above.
