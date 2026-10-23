@@ -29,7 +29,7 @@ Fedora 44 was checked too (Red Hat fonts 4.1.0-3.fc44, license `OFL-1.1-RFN AND 
 
 **Why the container still uses the vendored files.** Fedora's package is the same font version (1.030, `fc-scan` reports 67502) but ships OpenType/CFF `.otf` files, while this folder holds `.ttf`. The bytes differ. If the image installed the RPMs as well, the family name "Red Hat Text" would resolve to two different files (the system `.otf` and the registered `.ttf`) and layout could depend on which one wins. So the `Containerfile` installs only the fallback families and leaves the Red Hat fonts to this folder: one source, the same bytes on every host. CJK labels need a Noto CJK package (Fedora) or a vendored copy; that is out of scope for v1alpha1.
 
-UBI 9 was the first base image considered. It has none of the Red Hat, Liberation Sans or Noto fonts, so it would have needed the vendored files too; the Fedora Python images were chosen instead (see `../Containerfile`).
+UBI 9 was the first base image considered. It has none of the Red Hat, Liberation Sans or Noto fonts, so it would have needed the vendored files too; the Fedora Python images were chosen instead (see `Containerfile` at the repository root).
 
 ## DOCX
 

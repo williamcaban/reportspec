@@ -1,6 +1,6 @@
 """Chart renderer for ReportSpec v1alpha1 (DRAFT): resolved viz payload in, SVG out.
 
-The seam with the rest of the implementation is the payload (schemas/resolved-viz-v1alpha1.schema.json).
+The seam with the rest of the implementation is the payload (src/reportspec/schemas/resolved-viz-v1alpha1.schema.json).
 Nothing here sees bindings, templates or hosts, so EvalHub and ASAGO can share it.
 
   bar, line, heatmap, boxplot  Altair builds a Vega-Lite spec
@@ -20,7 +20,7 @@ from typing import Any
 import altair as alt
 import vl_convert as vlc
 
-from reportspec_fonts import SANS_STACK, register_with_vl_convert
+from .fontset import SANS_STACK, register_with_vl_convert
 
 register_with_vl_convert()
 FONT = SANS_STACK  # Red Hat Text, embedded by the document; open fallbacks only

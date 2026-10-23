@@ -1,26 +1,13 @@
-# /// script
-# requires-python = ">=3.13"
-# dependencies = ["pyyaml>=6", "jsonschema>=4.23", "jinja2>=3.1.4", "jsonpath-rfc9535>=0.1.5", "markdown-it-py>=3", "altair>=6", "vl-convert-python>=1.9", "weasyprint>=68"]  # docx output also needs the pandoc binary
-# ///
-"""Reference validator, bundler and renderer for ReportSpec v1alpha1 (DRAFT): Markdown, JSON, HTML and PDF.
+"""ReportSpec v1alpha1 (DRAFT) reference implementation: validator, bundler, renderer and conformance runner.
 
 Host-neutral: a spec binds to a ResultsBundle, and adapters turn each host's native
-results (EvalHub job, MiDojo results.json, Policy Mapper risk-extraction.json) into one.
+results (EvalHub job, MiDojo results.json, Policy Mapper risk-extraction.json, JSONL) into one.
 Not product code. It exists to prove the spec is implementable and to pin down semantics.
-
-    uv run reportspec.py validate examples/safety-compliance.report.md
-    uv run reportspec.py bundle --input examples/inputs/evalhub-job.json
-    uv run reportspec.py render examples/agent-redteam.report.md \
-        --input examples/inputs/asago-risk-extraction.json \
-        --input examples/inputs/midojo-results.json --format markdown
-    uv run reportspec.py render examples/model-release.report.md \
-        --input examples/inputs/model-release.jsonl --format pdf -o model-release.pdf
-    uv run reportspec.py conformance conformance/
+The command line is in cli.py.
 """
 
 from __future__ import annotations
 
-import argparse
 import datetime as dt
 import hashlib
 import json
@@ -77,7 +64,7 @@ FORBIDDEN_NODES = (
     nodes.ScopedEvalContextModifier, nodes.EvalContextModifier,
 )
 VIZ_DATA_TYPES = {"radar": "series", "radial": "series", "bar": "series", "line": "series", "heatmap": "matrix", "table": "table", "boxplot": "table"}
-CHART_TYPES = {"bar", "line", "heatmap", "radar", "radial", "boxplot"}  # drawn by reportspec_charts; table and summary_cards are text
+CHART_TYPES = {"bar", "line", "heatmap", "radar", "radial", "boxplot"}  # drawn by charts.py; table and summary_cards are text
 RESOLVED_SCHEMA = HERE / "schemas" / "resolved-viz-v1alpha1.schema.json"
 NA = "N/A"
 MD_ESCAPE_RE = re.compile(r"([\\`*_\[\]<>|!#])")
@@ -691,12 +678,20 @@ def build_bundle(inputs: list[str]) -> dict[str, Any]:
     warn = bundle["warnings"].append
     for spec in inputs:
         name, sep, rest = spec.partition(":")
+        if sep and name not in ADAPTERS and re.fullmatch(r"[a-z][a-z0-9-]*", name) and not Path(spec).exists():
+            raise SpecError(f"unknown adapter {name!r} in --input {spec!r}; adapters: {', '.join(ADAPTERS)}")
         adapter, path = (name, Path(rest)) if sep and name in ADAPTERS else (None, Path(spec))
-        raw = path.read_bytes()
+        try:
+            raw = path.read_bytes()
+        except OSError as e:
+            raise SpecError(f"cannot read input {path}: {e.strerror}") from e
         if adapter == "jsonl" or (adapter is None and path.suffix.lower() in (".jsonl", ".ndjson")):
             adapter, doc = "jsonl", parse_jsonl(raw, path)
         else:
-            doc = json.loads(raw)
+            try:
+                doc = json.loads(raw)
+            except json.JSONDecodeError as e:
+                raise SpecError(f"{path.name} is not valid JSON: {e}") from e
             adapter = adapter or detect_adapter(doc)
         part = ADAPTERS[adapter](doc)
         ids = [e["id"] for e in part.get("evaluations", [])]
@@ -1078,7 +1073,7 @@ def _chart_num(v: Any, where: str) -> float | None:
 def resolve_viz(blk: dict[str, Any], ctx: dict[str, Any], params: dict[str, Any],
                 bindings: dict[str, Any], directions: dict[str, str | None]) -> dict[str, Any]:
     """The seam between bindings and drawing: everything a chart renderer needs, as plain JSON
-    (schemas/resolved-viz-v1alpha1.schema.json). Verdict colors come from threshold + direction here;
+    (src/reportspec/schemas/resolved-viz-v1alpha1.schema.json). Verdict colors come from threshold + direction here;
     the renderer never sees a binding, a template or a host."""
     t, name, vid = blk["type"], blk["data"], blk["id"]
     b = bindings[name]
@@ -1249,7 +1244,7 @@ def render_text(text: str, spec_name: str, inputs: list[str], out_format: str, o
     if html_doc is not None:
         if out_format in ("html", "docx"):
             return html_doc, rep
-        from reportspec_html import html_to_pdf
+        from .htmlout import html_to_pdf
         try:
             return html_to_pdf(html_doc), rep
         except RuntimeError as e:
@@ -1261,8 +1256,8 @@ def _render_html(md_raw: str, by_id: dict[str, dict[str, Any]], ctx: dict[str, A
                  bindings: dict[str, Any], directions: dict[str, str | None], fm: dict[str, Any], report: dict[str, Any],
                  bundle: dict[str, Any], rep: Report, payloads: dict[str, dict[str, Any]], out_format: str) -> str | bytes:
     """Charts become inline SVG figures (PNG in DOCX); tables and summary cards stay Markdown tables with PASS/FAIL badges."""
-    from reportspec_charts import ChartError, render_payload
-    from reportspec_html import FIG_TOKEN, build_html, figure_html
+    from .charts import ChartError, render_payload
+    from .htmlout import FIG_TOKEN, build_html, figure_html
 
     validator = Draft202012Validator(json.loads(RESOLVED_SCHEMA.read_text()))
     figs: dict[str, Any] = {}
@@ -1290,7 +1285,7 @@ def _render_html(md_raw: str, by_id: dict[str, dict[str, Any]], ctx: dict[str, A
     opts = opts if isinstance(opts, dict) else {}
     evidence = {k: report[k] for k in ("spec_name", "spec_version", "spec_digest", "generated_at")} | {"sources": bundle["sources"], "warnings": rep.warnings}
     if out_format == "docx":
-        from reportspec_docx import DocxError, build_docx
+        from .docxout import DocxError, build_docx
         try:
             return build_docx(md_html, {vid: {"number": order.index(vid) + 1, "title": payloads[vid]["title"], "caption": payloads[vid]["caption"],
                                               "note": figs[vid].note, "alt": figs[vid].alt, "svg": figs[vid].svg} for vid in order}, fm, evidence, toc=bool(opts.get("toc")))
@@ -1307,6 +1302,9 @@ def run_conformance(root: Path) -> int:
     """Each case is a directory with case.yaml; see conformance/README.md for the keys."""
     failures = skipped = 0
     cases = sorted(p.parent for p in root.glob("*/case.yaml"))
+    if not cases:
+        print(f"failed: no conformance cases (*/case.yaml) found in {root}", file=sys.stderr)
+        return 2
     for case_dir in cases:
         case = load_yaml((case_dir / "case.yaml").read_text())
         if "pandoc" in case.get("requires", []) and not shutil.which("pandoc"):
@@ -1375,65 +1373,3 @@ def run_conformance(root: Path) -> int:
             print(f"      {p}")
     print(f"\n{len(cases) - failures - skipped}/{len(cases) - skipped} cases passed" + (f", {skipped} skipped" if skipped else ""))
     return 1 if failures else 0
-
-
-def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    sub = ap.add_subparsers(dest="cmd", required=True)
-    v = sub.add_parser("validate")
-    v.add_argument("spec", type=Path)
-    bnd = sub.add_parser("bundle", help="print the ResultsBundle built from the inputs")
-    r = sub.add_parser("render")
-    r.add_argument("spec", type=Path)
-    for p in (bnd, r):
-        p.add_argument("--input", action="append", required=True, metavar="[ADAPTER:]PATH",
-                       help=f"native results file; adapter auto-detected or one of {', '.join(ADAPTERS)}")
-    r.add_argument("--format", choices=["markdown", "json", "html", "pdf", "docx"], default="markdown")
-    r.add_argument("-o", "--output", type=Path, help="write the report here (required for pdf and docx); html, pdf and docx also write <name>.manifest.json next to it")
-    r.add_argument("--param", action="append", default=[], metavar="NAME=VALUE")
-    c = sub.add_parser("conformance")
-    c.add_argument("dir", type=Path)
-    a = ap.parse_args()
-
-    if a.cmd == "conformance":
-        return run_conformance(a.dir)
-    try:
-        if a.cmd == "validate":
-            rep, fm, *_ = validate_text(a.spec.read_text(encoding="utf-8"))
-            for w in rep.warnings:
-                print(f"warning: {w}")
-            for e in rep.errors:
-                print(f"error: {e}")
-            hosts = host_namespaces(fm) if fm else []
-            print(("valid" if not rep.errors else f"invalid ({len(rep.errors)} errors)")
-                  + (f"; host namespaces not checked by core: {', '.join(hosts)}" if hosts else ""))
-            return 1 if rep.errors else 0
-        if a.cmd == "bundle":
-            print(json.dumps(build_bundle(a.input), indent=2))
-            return 0
-        out, rep = render_text(a.spec.read_text(encoding="utf-8"), a.spec.name, a.input, a.format,
-                               dict(p.split("=", 1) for p in a.param))
-        for w in rep.warnings:
-            print(f"warning: {w}", file=sys.stderr)
-        if isinstance(out, bytes) and not a.output:
-            print(f"failed: --format {a.format} needs -o OUTPUT.{a.format}", file=sys.stderr)
-            return 2
-        if a.output:
-            a.output.parent.mkdir(parents=True, exist_ok=True)
-            a.output.write_bytes(out) if isinstance(out, bytes) else a.output.write_text(out, encoding="utf-8")
-            note = f"wrote {a.output} ({a.output.stat().st_size:,} bytes)"
-            if a.format in ("html", "pdf", "docx"):
-                mpath = a.output.with_name(a.output.stem + ".manifest.json")
-                mpath.write_text(json.dumps(rep.manifest, indent=2, default=str), encoding="utf-8")
-                note += f"; evidence manifest {mpath}"
-            print(note, file=sys.stderr)
-        else:
-            print(out)
-    except (SpecError, MissingValueError) as e:
-        print(f"failed: {e}", file=sys.stderr)
-        return 2
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

@@ -23,7 +23,7 @@ from jinja2 import Environment, select_autoescape
 from markdown_it import MarkdownIt
 from markupsafe import Markup
 
-from reportspec_fonts import MONO_STACK, SANS_STACK, font_face_css
+from .fontset import MONO_STACK, SANS_STACK, font_face_css
 
 FIG_TOKEN = "@@RS-FIG:{}@@"
 FIG_RE = re.compile(r"<p>@@RS-FIG:([a-z][a-z0-9-]*)@@</p>")
@@ -155,22 +155,24 @@ def build_html(md_html: str, figures: dict[str, str], fm: dict[str, Any], report
         css=Markup(font_face_css() + CSS.replace("__PAGE__", page).replace("__SANS__", SANS_STACK).replace("__MONO__", MONO_STACK)))
 
 
-def _ensure_native_libs() -> None:
-    """WeasyPrint needs Pango. Homebrew installs it outside dyld's default search path, and dyld reads
-    DYLD_FALLBACK_LIBRARY_PATH only at process start, so set it and re-exec once."""
+def ensure_native_libs() -> None:
+    """For the command line on macOS only: WeasyPrint needs Pango, Homebrew installs it outside dyld's default
+    search path, and dyld reads DYLD_FALLBACK_LIBRARY_PATH only at process start, so set it and re-exec once.
+    Never call this from library code, because it replaces the process. A host that embeds the renderer on macOS
+    sets DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib itself."""
     brew = Path("/opt/homebrew/lib")
     if sys.platform == "darwin" and brew.is_dir() and str(brew) not in os.environ.get("DYLD_FALLBACK_LIBRARY_PATH", ""):
         os.environ["DYLD_FALLBACK_LIBRARY_PATH"] = f"{brew}:{os.environ.get('DYLD_FALLBACK_LIBRARY_PATH', '')}".rstrip(":")
-        os.execv(sys.executable, [sys.executable, *sys.argv])
+        os.execv(sys.executable, [sys.executable, *sys.orig_argv[1:]])  # the original command, however it was started
 
 
 def html_to_pdf(html: str) -> bytes:
     """HTML to PDF with WeasyPrint. The document is self-contained (fonts and charts are inline), so the
     fetcher allows data: URIs and nothing else: no network, no local files (VQA-19)."""
-    _ensure_native_libs()
     try:
         from weasyprint import HTML, URLFetcher
     except OSError as e:  # missing Pango / GObject
-        raise RuntimeError(f"WeasyPrint could not load its native libraries ({e}). Install Pango, for example: brew install pango") from e
+        raise RuntimeError(f"WeasyPrint could not load its native libraries ({e}). Install Pango (dnf install pango, brew install pango); "
+                           "on macOS with Homebrew also set DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib") from e
 
     return HTML(string=html, url_fetcher=URLFetcher(allowed_protocols=["data"])).write_pdf()

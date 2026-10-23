@@ -8,44 +8,61 @@
 
 | File | What it is |
 |---|---|
-| [`schemas/reportspec-v1alpha1.schema.json`](schemas/reportspec-v1alpha1.schema.json) | JSON Schema (2020-12) for the front matter. `#/$defs/vizBlock` validates each viz block |
-| [`schemas/results-bundle-v1alpha1.schema.json`](schemas/results-bundle-v1alpha1.schema.json) | The ResultsBundle: the host-neutral results model that bindings resolve against |
+| [`src/reportspec/schemas/reportspec-v1alpha1.schema.json`](src/reportspec/schemas/reportspec-v1alpha1.schema.json) | JSON Schema (2020-12) for the front matter. `#/$defs/vizBlock` validates each viz block |
+| [`src/reportspec/schemas/results-bundle-v1alpha1.schema.json`](src/reportspec/schemas/results-bundle-v1alpha1.schema.json) | The ResultsBundle: the host-neutral results model that bindings resolve against |
 | [`profiles/evalhub.md`](profiles/evalhub.md), [`profiles/asago.md`](profiles/asago.md) | Host profiles: adapters, host namespace, API surface |
 | [`examples/safety-compliance.report.md`](examples/safety-compliance.report.md) | EvalHub example: one collection run, compliance audience |
 | [`examples/agent-redteam.report.md`](examples/agent-redteam.report.md) | ASAGO example: Policy Mapper risks + MiDojo red team + EvalHub Garak, one bundle |
 | [`examples/inputs/`](examples/inputs/) | Native results in each tool's real shape (provenance in each file's `_comment`) |
 | [`conformance/`](conformance/) | 34 cases every implementation must pass |
 | [`examples/model-release.report.md`](examples/model-release.report.md) | Showcase: one Markdown file plus [one JSONL file](examples/inputs/model-release.jsonl) render to HTML and PDF with every chart type. Synthetic data |
-| [`schemas/resolved-viz-v1alpha1.schema.json`](schemas/resolved-viz-v1alpha1.schema.json) | The payload a chart renderer receives: bindings resolved, text formatted. The seam between the spec and any drawing library |
-| [`reportspec.py`](reportspec.py) | Reference validator, bundler, renderer (Markdown, JSON, HTML, PDF, DOCX) and conformance runner. Not product code |
-| [`reportspec_charts.py`](reportspec_charts.py), [`reportspec_html.py`](reportspec_html.py), [`reportspec_docx.py`](reportspec_docx.py), [`reportspec_fonts.py`](reportspec_fonts.py) | Chart renderer (payload in, SVG out), HTML/PDF assembly, DOCX via pandoc, embedded fonts |
-| [`fonts/`](fonts/README.md), [`icons/`](icons/README.md) | Vendored Red Hat Text/Mono (OFL) and Font Awesome Free status icons (CC BY 4.0), with provenance and font policy |
+| [`src/reportspec/schemas/resolved-viz-v1alpha1.schema.json`](src/reportspec/schemas/resolved-viz-v1alpha1.schema.json) | The payload a chart renderer receives: bindings resolved, text formatted. The seam between the spec and any drawing library |
+| [`src/reportspec/`](src/reportspec/) | The `reportspec` package and command: `core.py` (validator, bundler, renderer, conformance runner), `cli.py`. Reference implementation, not product code |
+| `charts.py`, `htmlout.py`, `docxout.py`, `fontset.py` (same folder) | Chart renderer (payload in, SVG out), HTML/PDF assembly, DOCX via pandoc, embedded fonts |
+| [`fonts/`](src/reportspec/fonts/README.md), [`icons/`](src/reportspec/icons/README.md) (in the package) | Vendored Red Hat Text/Mono (OFL) and Font Awesome Free status icons (CC BY 4.0), with provenance and font policy |
 | [`VISUAL-QA.md`](VISUAL-QA.md) | What "the chart looks right" means: 21 requirements, how they are checked, regression cases |
-| [`Containerfile`](Containerfile), `reportspec.py.lock` | Fedora Python image (3.14 by default, 3.13 with `--build-arg PY=313`) with every dependency pinned and hash-checked. Runs offline, non-root, read-only |
+| [`Containerfile`](Containerfile), `uv.lock` | Fedora Python image (3.14 by default, 3.13 with `--build-arg PY=313`) with every dependency pinned and hash-checked. Runs offline, non-root, read-only |
+
+### Install
+
+Python 3.13 or later. Not on PyPI yet; install from GitHub:
 
 ```bash
-uv run reportspec.py validate examples/safety-compliance.report.md
-uv run reportspec.py render examples/safety-compliance.report.md --input examples/inputs/evalhub-job.json
-uv run reportspec.py render examples/agent-redteam.report.md \
+uv tool install git+https://github.com/williamcaban/reportspec     # puts `reportspec` on your PATH
+uvx --from git+https://github.com/williamcaban/reportspec reportspec --version   # or run it once, nothing installed
+pip install git+https://github.com/williamcaban/reportspec          # or plain pip, ideally in a virtualenv
+```
+
+PDF output needs Pango (`dnf install pango`, `brew install pango`; on macOS the command finds Homebrew's copy by itself) and DOCX output needs `pandoc` (`dnf install pandoc`, `brew install pandoc`). From a clone, use `uv run reportspec …` instead of `reportspec …`; `uv run pytest` runs the tests.
+
+### Commands
+
+```bash
+reportspec validate examples/safety-compliance.report.md
+reportspec render examples/safety-compliance.report.md --input examples/inputs/evalhub-job.json
+reportspec render examples/agent-redteam.report.md \
   --input examples/inputs/asago-risk-extraction.json \
   --input examples/inputs/midojo-results.json \
   --input examples/inputs/evalhub-job.json
-uv run reportspec.py bundle --input examples/inputs/midojo-results.json   # show the normalized bundle
-uv run reportspec.py conformance conformance/
+reportspec bundle --input examples/inputs/midojo-results.json   # show the normalized bundle
+reportspec conformance conformance/
 ```
 
 ### Try it: one Markdown file and one JSONL file to HTML and PDF
 
 ```bash
-uv run reportspec.py render examples/model-release.report.md \
+reportspec render examples/model-release.report.md \
   --input examples/inputs/model-release.jsonl --format pdf  -o out/model-release.pdf
-uv run reportspec.py render examples/model-release.report.md \
+reportspec render examples/model-release.report.md \
   --input examples/inputs/model-release.jsonl --format html -o out/model-release.html
 ```
 
 Add `--format docx -o out/model-release.docx` for an editable Word copy. Auditors who must annotate a report want this; it needs the `pandoc` binary on the PATH (GPL-2.0+, run as a separate process). Charts arrive as PNG images with Red Hat Text, tables as Word tables, and the report keeps its Evidence section; template images are rejected, and pandoc never reads raw HTML or raw OOXML from the Markdown.
 
 Rendered samples are checked in under [`examples/output/`](examples/output/) so you can open them without running anything.
+
+Each run writes the report and `<name>.manifest.json`, the evidence record (spec digest, SHA-256 of each input, one digest per figure payload, the Markdown fallback). The HTML is a single self-contained file: inline SVG charts, inline CSS, no external requests.
+
 
 ### Or in a container (Fedora, Python 3.14 or 3.13)
 
@@ -57,9 +74,7 @@ podman run --rm --network none --read-only --tmpfs /tmp -v "$PWD/out:/out:Z" rep
 podman run --rm --network none reportspec conformance conformance
 ```
 
-The image carries pango, pandoc, the fallback fonts (Liberation, DejaVu) and a virtualenv built from `reportspec.py.lock` with hash checking, so after the build it needs no network, and it runs under OpenShift's arbitrary-uid rule (group 0 owns the files). Red Hat Text and Mono are not installed from RPMs on purpose; the vendored files are the only source (see [fonts/README.md](fonts/README.md)). Regenerate the lock with `uv lock --script reportspec.py` after changing the dependency list at the top of the script. On macOS, the Podman machine here could not mount a directory under `/tmp`; use one under your home.
-
-Each run writes the report and `<name>.manifest.json`, the evidence record (spec digest, SHA-256 of each input, one digest per figure payload, the Markdown fallback). The HTML is a single self-contained file: inline SVG charts, inline CSS, no external requests. The PDF needs Pango (`brew install pango` on macOS; the script finds it by itself). Dependencies install on first run through `uv`, which also provides Python 3.13 or later (the reference implementation requires it).
+The image carries pango, pandoc, the fallback fonts (Liberation, DejaVu) and a virtualenv built from `uv.lock` with hash checking, so after the build it needs no network, and it runs under OpenShift's arbitrary-uid rule (group 0 owns the files). Red Hat Text and Mono are not installed from RPMs on purpose; the vendored files are the only source (see [fonts/README.md](src/reportspec/fonts/README.md)). Regenerate the lock with `uv lock` after changing the dependencies in `pyproject.toml`. On macOS, the Podman machine here could not mount a directory under `/tmp`; use one under your home.
 
 What the template author writes is a Markdown file with a few `reportspec-viz` fences. A chart is a type, a data binding and a few options:
 
@@ -153,7 +168,7 @@ The binding-level display hint is called `display` so it can't be confused with 
 
 ## 5. The ResultsBundle
 
-The bundle is a small, flat model of "what was evaluated, how, and with what result". The full schema is [`results-bundle-v1alpha1.schema.json`](schemas/results-bundle-v1alpha1.schema.json).
+The bundle is a small, flat model of "what was evaluated, how, and with what result". The full schema is [`results-bundle-v1alpha1.schema.json`](src/reportspec/schemas/results-bundle-v1alpha1.schema.json).
 
 ```json
 {
@@ -307,7 +322,7 @@ Fenced code blocks with the info string `reportspec-viz`, whose YAML body is val
 | `table` | table | `columns[]`, `sort_by`, `status_field` + `status_pass_when` (set `false` for fields where true is bad, like `attack_succeeded`), `sortable` |
 | `summary_cards` | none; each card's `value` is a scalar | `cards[] {label, value, display, precision, threshold, direction}` |
 
-Resolution and drawing are separate. The host resolves a block against the bundle into a [resolved payload](schemas/resolved-viz-v1alpha1.schema.json) (plain JSON, values and text already formatted, verdict inputs already evaluated), and a chart renderer turns that payload into SVG. The reference renderer builds Vega-Lite specs with Altair for `bar`, `line`, `heatmap` and `boxplot`, and Vega specs for `radar` and `radial`, all rendered through `vl-convert` with external data loading disabled. A host can swap the renderer without touching a template. What a figure must look like is [VISUAL-QA.md](VISUAL-QA.md). Every chart adds a figure number, a caption note (threshold, direction, N/A count) and generated alt text.
+Resolution and drawing are separate. The host resolves a block against the bundle into a [resolved payload](src/reportspec/schemas/resolved-viz-v1alpha1.schema.json) (plain JSON, values and text already formatted, verdict inputs already evaluated), and a chart renderer turns that payload into SVG. The reference renderer builds Vega-Lite specs with Altair for `bar`, `line`, `heatmap` and `boxplot`, and Vega specs for `radar` and `radial`, all rendered through `vl-convert` with external data loading disabled. A host can swap the renderer without touching a template. What a figure must look like is [VISUAL-QA.md](VISUAL-QA.md). Every chart adds a figure number, a caption note (threshold, direction, N/A count) and generated alt text.
 
 Rules: no template syntax inside a fence; no colors (`palette` states intent, the renderer owns colors); thresholds are a literal, `{param: x}` or `{binding: x}`; a block may sit inside `{% if %}` but not inside `{% for %}`; `format.markdown.viz: table` renders each block as a GFM table for CI and PR comments.
 
@@ -402,4 +417,4 @@ Source digests tie each number in the report to the exact input file that produc
 
 ## License
 
-Apache-2.0 (see [LICENSE](LICENSE)). The fonts in `fonts/` (SIL OFL 1.1) and the icons in `icons/` (CC BY 4.0) keep their own licenses; [NOTICE](NOTICE) lists them with the provenance of the example inputs.
+Apache-2.0 (see [LICENSE](LICENSE)). The fonts in `src/reportspec/fonts/` (SIL OFL 1.1) and the icons in `src/reportspec/icons/` (CC BY 4.0) keep their own licenses; [NOTICE](NOTICE) lists them with the provenance of the example inputs.

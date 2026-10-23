@@ -25,7 +25,7 @@ from typing import Any
 import vl_convert as vlc
 from markdown_it import MarkdownIt
 
-from reportspec_fonts import register_with_vl_convert
+from .fontset import register_with_vl_convert
 
 FIG_RE = re.compile(r"^@@RS-FIG:([a-z][a-z0-9-]*)@@$", re.M)
 READER = "commonmark_x-raw_html-raw_attribute"
