@@ -4,6 +4,9 @@ ReportSpec v1alpha1 (draft). Start with the [README](../README.md) for install a
 
 | Page | Read it to |
 |---|---|
+| [Tutorial: your first report](tutorial.md) | Go from a JSONL file and a template to a rendered report, step by step |
+| [Parameters](parameters.md) | Declare parameters, lock them, use them in a template, override them with `--param` |
+| [Writing JSONL results](jsonl.md) | Produce a results file for your template, line by line |
 | [Concepts and design](concepts.md) | Understand why one spec serves two projects, the three layers, and the design decisions |
 | [Writing a report template](authoring.md) | Write a `.report.md`: front matter, template language, missing data, visualization blocks |
 | [Results, adapters and bindings](results-and-bindings.md) | Feed results in (JSONL, EvalHub, MiDojo, Policy Mapper) and refer to them from a template |

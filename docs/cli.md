@@ -2,6 +2,8 @@
 
 For installation see the [README](../README.md#install).
 
+Options for `render`: `--input PATH` (repeatable; `jsonl:PATH` or another adapter name as a prefix forces a format), `--format markdown|json|html|pdf|docx`, `-o FILE`, `--param NAME=VALUE` (repeatable; see [Parameters](parameters.md)). Exit code 0 is success. `validate` exits 1 when the template has errors. Any other failure (bad template at render time, bad input, bad `--param`, missing file, failed conformance case setup) exits 2 with a one-line message.
+
 ## Commands
 
 ```bash

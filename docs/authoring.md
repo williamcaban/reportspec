@@ -1,6 +1,6 @@
 # Writing a report template
 
-Everything an author needs: front matter, the template language, how missing data behaves, and the visualization blocks.
+Everything an author needs: front matter, the template language, how missing data behaves, and the visualization blocks. New to this? Start with the [tutorial](tutorial.md); see also [Parameters](parameters.md) and [Writing JSONL results](jsonl.md).
 
 ## Front matter conventions
 

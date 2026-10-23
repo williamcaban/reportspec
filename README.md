@@ -70,7 +70,7 @@ Charts, tables and cards are drawn only from resolved data. Pass/fail marks come
 
 ## Documentation
 
-See [docs/](docs/README.md): [concepts](docs/concepts.md), [writing a template](docs/authoring.md), [results and bindings](docs/results-and-bindings.md), [command line](docs/cli.md), [output and conformance](docs/output-and-conformance.md), [container](docs/container.md), [hosts](docs/hosts/README.md), [status and open questions](docs/status.md). Chart quality requirements are in [VISUAL-QA.md](VISUAL-QA.md).
+New here? Follow the [tutorial](docs/tutorial.md). Then see [docs/](docs/README.md): [parameters](docs/parameters.md), [JSONL results](docs/jsonl.md), [concepts](docs/concepts.md), [writing a template](docs/authoring.md), [results and bindings](docs/results-and-bindings.md), [command line](docs/cli.md), [output and conformance](docs/output-and-conformance.md), [container](docs/container.md), [hosts](docs/hosts/README.md), [status and open questions](docs/status.md). Chart quality requirements are in [VISUAL-QA.md](VISUAL-QA.md).
 
 From a clone, use `uv run reportspec …` in place of `reportspec …`, and `uv run pytest` to run the tests.
 

@@ -114,3 +114,42 @@ def test_docx_without_pandoc_is_a_clean_error(tmp_path, monkeypatch, capsys):
     monkeypatch.setenv("PATH", str(tmp_path))
     assert main(["render", str(SPEC), "--input", str(JSONL), "--format", "docx", "-o", str(tmp_path / "x.docx")]) == 2
     assert "pandoc not found" in capsys.readouterr().err
+
+
+QUICKSTART = ROOT / "examples" / "quickstart.report.md"
+QUICKSTART_JSONL = ROOT / "examples" / "inputs" / "quickstart.jsonl"
+
+
+def _quickstart(*extra):
+    return main(["render", str(QUICKSTART), "--input", str(QUICKSTART_JSONL), "--format", "markdown", *extra])
+
+
+def test_quickstart_example_renders(capsys):
+    assert main(["validate", str(QUICKSTART)]) == 0
+    assert _quickstart() == 0
+    out = capsys.readouterr().out
+    assert "above the 10% ceiling" in out and "data unavailable" in out
+
+
+def test_param_override_changes_the_render(capsys):
+    assert _quickstart("--param", "team=Red team", "--param", "min_accuracy=0.5") == 0
+    out = capsys.readouterr().out
+    assert "Red team" in out and "Threshold: 50.0%" in out
+
+
+@pytest.mark.parametrize("arg,message", [
+    ("asr_ceiling=0.5", "not overridable"),
+    ("nope=1", "not declared"),
+    ("min_accuracy=abc", "is not a number"),
+])
+def test_bad_param_overrides_are_clean_errors(arg, message, capsys):
+    assert _quickstart("--param", arg) == 2
+    err = capsys.readouterr().err
+    assert message in err and "Traceback" not in err
+
+
+def test_choices_are_enforced_on_override(tmp_path, capsys):
+    spec = tmp_path / "c.report.md"
+    spec.write_text(QUICKSTART.read_text().replace("  team: Evaluation team", "  team:\n    value: a\n    choices: [a, b]"))
+    assert main(["render", str(spec), "--input", str(QUICKSTART_JSONL), "--format", "markdown", "--param", "team=c"]) == 2
+    assert "is not one of" in capsys.readouterr().err
