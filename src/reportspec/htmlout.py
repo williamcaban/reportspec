@@ -15,7 +15,7 @@ import html as htmllib
 import os
 import re
 import sys
-from functools import lru_cache
+from functools import cache
 from pathlib import Path
 from typing import Any
 
@@ -32,7 +32,7 @@ ICON_DIR = Path(__file__).parent / "icons"
 ICON_FILES = {"PASS": "circle-check.svg", "FAIL": "circle-xmark.svg"}  # Font Awesome Free (icons: CC BY 4.0), see icons/LICENSE.txt
 
 
-@lru_cache(maxsize=None)
+@cache
 def _icon(word: str) -> str:
     """Inline SVG icon for a badge. Glyphs would depend on the font (Red Hat Text has no check or cross), so icons are SVG."""
     svg = (ICON_DIR / ICON_FILES[word]).read_text()

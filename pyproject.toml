@@ -39,7 +39,15 @@ Issues = "https://github.com/williamcaban/reportspec/issues"
 reportspec = "reportspec.cli:main"
 
 [dependency-groups]
-dev = ["pytest>=8"]
+dev = ["pytest>=8", "ruff>=0.8"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 140
+
+[tool.ruff.lint]
+# Correctness and hygiene only; style churn is not worth a failing build. E501 is off: the code has long lines on purpose.
+select = ["E4", "E7", "E9", "F", "I", "B", "UP"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

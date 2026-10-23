@@ -2,6 +2,7 @@
 
 import json
 import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -89,6 +90,23 @@ def test_render_pdf():
     from reportspec.core import render_text
     out, _ = render_text(SPEC.read_text(encoding="utf-8"), SPEC.name, [str(JSONL)], "pdf", {})
     assert out.startswith(b"%PDF") and len(out) > 20_000
+
+
+@pytest.mark.skipif(not shutil.which("pdffonts"), reason="needs poppler-utils")
+def test_pdf_embeds_only_red_hat_fonts(tmp_path):
+    """VISUAL-QA VQA-13: output must not depend on the fonts the machine happens to have."""
+    try:
+        from weasyprint import HTML  # noqa: F401
+    except OSError:
+        pytest.skip("Pango not loadable in this process")
+    from reportspec.core import render_text
+    pdf = tmp_path / "r.pdf"
+    pdf.write_bytes(render_text(SPEC.read_text(encoding="utf-8"), SPEC.name, [str(JSONL)], "pdf", {})[0])
+    rows = subprocess.run(["pdffonts", str(pdf)], capture_output=True, text=True, check=True).stdout.splitlines()[2:]
+    names = {row.split()[0].split("+")[-1] for row in rows if row.strip()}
+    assert names, "no fonts listed"
+    assert all(n.startswith(("Red-Hat-Text", "Red-Hat-Mono")) for n in names), names
+    assert all(" yes " in row for row in rows if row.strip()), "a font is not embedded"
 
 
 @pytest.mark.skipif(not shutil.which("pandoc"), reason="needs pandoc")

@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test (py${{ matrix.python }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: System packages (Pango for PDF, pandoc for DOCX, poppler for the font audit, fallback fonts)
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends \
+            libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 \
+            pandoc poppler-utils fonts-liberation fonts-dejavu-core
+
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+
+      - name: Install locked dependencies
+        run: |
+          uv lock --check
+          uv sync --frozen --python ${{ matrix.python }}
+
+      - name: Lint
+        run: uv run --frozen ruff check src tests
+
+      - name: Unit tests (includes the PDF font audit)
+        run: uv run --frozen pytest -ra
+
+      - name: Conformance suite
+        run: uv run --frozen reportspec conformance conformance
+
+      - name: Build wheel and sdist
+        run: uv build --out-dir dist
+
+      - name: Wheel works from a clean environment, outside the checkout
+        run: |
+          uv venv --python ${{ matrix.python }} "$RUNNER_TEMP/clean"
+          uv pip install --python "$RUNNER_TEMP/clean/bin/python" dist/*.whl
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/clean/bin/reportspec" --version
+          "$RUNNER_TEMP/clean/bin/reportspec" render "$GITHUB_WORKSPACE/examples/model-release.report.md" \
+            --input "$GITHUB_WORKSPACE/examples/inputs/model-release.jsonl" --format pdf -o "$RUNNER_TEMP/out.pdf"
+          pdffonts "$RUNNER_TEMP/out.pdf" | tee "$RUNNER_TEMP/fonts.txt"
+          if tail -n +3 "$RUNNER_TEMP/fonts.txt" | grep -v "Red-Hat-"; then echo "non Red Hat font in the PDF"; exit 1; fi
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: dist-py${{ matrix.python }}
+          path: |
+            dist/
+            ${{ runner.temp }}/out.pdf
+          if-no-files-found: ignore
+          retention-days: 7
+
+  container:
+    name: container (py${{ matrix.python }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["313", "314"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build the Fedora image
+        run: docker build -f Containerfile --build-arg PY=${{ matrix.python }} -t reportspec:ci .
+
+      - name: Conformance, offline, read-only, arbitrary uid (the OpenShift conditions)
+        run: docker run --rm --network none --read-only --user 1234:0 reportspec:ci conformance conformance
+
+      - name: PDF render in the same conditions, then audit its fonts
+        run: |
+          mkdir -p out && chmod 777 out
+          docker run --rm --network none --read-only --tmpfs /tmp --user 1234:0 -v "$PWD/out:/out" reportspec:ci \
+            render examples/model-release.report.md --input examples/inputs/model-release.jsonl --format pdf -o /out/model-release.pdf
+          pdffonts out/model-release.pdf | tee out/fonts.txt
+          if tail -n +3 out/fonts.txt | grep -v "Red-Hat-"; then echo "non Red Hat font in the PDF"; exit 1; fi

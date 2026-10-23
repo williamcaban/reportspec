@@ -8,8 +8,7 @@ import sys
 from pathlib import Path
 
 from . import __version__
-from .core import (ADAPTERS, MissingValueError, SpecError, build_bundle, host_namespaces, render_text,
-                   run_conformance, validate_text)
+from .core import ADAPTERS, MissingValueError, SpecError, build_bundle, host_namespaces, render_text, run_conformance, validate_text
 from .htmlout import ensure_native_libs
 
 DESCRIPTION = """ReportSpec v1alpha1 (DRAFT): render a Markdown report template and JSON/JSONL results to Markdown, JSON, HTML, PDF or DOCX.
