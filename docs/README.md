@@ -14,8 +14,7 @@ ReportSpec v1alpha1 (draft). Start with the [README](../README.md) for install a
 | [Output and conformance](output-and-conformance.md) | See the evidence manifest and the 34 conformance cases |
 | [Running in a container](container.md) | Build and run the Fedora image offline and read-only |
 | [Hosts](hosts/README.md) | Integrate with a host: [EvalHub](hosts/evalhub.md), [ASAGO](hosts/asago.md) |
-| [Status and open questions](status.md) | See what has been verified and what is undecided |
-| [Visual QA](../VISUAL-QA.md) | Know what "the chart looks right" means and how it is checked |
+| [Roadmap](roadmap.md) | See what is planned, what is verified, the open questions and the chart quality requirements |
 
 ## Reference files
 
