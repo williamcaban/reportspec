@@ -1,0 +1,6 @@
+# Project-local uv settings: nothing here depends on the parent repository or on user-level uv configuration.
+# The package cache lives inside this directory, and only uv-managed Pythons are used (never Homebrew or the system).
+# The Python install directory cannot be set in a config file; the Makefile sets UV_PYTHON_INSTALL_DIR to .uv/python.
+# `make clean` removes .venv and .uv.
+python-preference = "only-managed"
+cache-dir = ".uv/cache"

@@ -25,7 +25,7 @@ PDF output needs Pango (`dnf install pango`, `brew install pango`) and DOCX outp
 
 ## Run it
 
-ReportSpec runs in two ways. Both give the same output.
+ReportSpec runs from the command line or in a container, and has an optional HTTP service. All three give the same output.
 
 ### Command line
 
@@ -70,6 +70,25 @@ podman run --rm --network none --read-only --tmpfs /tmp -v "$PWD/work:/work:Z" r
 ```
 
 [Running in a container](docs/container.md) has the details: Docker and Linux file ownership, the build arguments, OpenShift, and what is inside the image.
+
+### As an HTTP service (optional)
+
+A standalone, stateless render service for programs that would rather call an API than run a command. It is not tied to EvalHub, ASAGO or any other product, and nothing else needs it. Install the extra and start it:
+
+```bash
+pip install "reportspec[service] @ git+https://github.com/williamcaban/reportspec"
+reportspec serve --playground          # http://127.0.0.1:8000, API docs at /docs, playground at /
+```
+
+Or in the container: `podman run --rm -p 8000:8000 reportspec serve --host 0.0.0.0 --playground`. Send a template and results as JSON and get the report back:
+
+```bash
+jq -n --rawfile spec examples/quickstart.report.md --rawfile data examples/inputs/quickstart.jsonl \
+  '{spec: $spec, inputs: [{content: $data, adapter: "jsonl"}], format: "pdf"}' |
+  curl -s -X POST http://127.0.0.1:8000/v1/render -H 'Content-Type: application/json' --data @- -o report.pdf
+```
+
+The [playground](docs/service.md#the-playground) is a web page for trying a template without writing any code. [Render service](docs/service.md) has the endpoints, errors, limits and security notes.
 
 ## Example output
 
@@ -119,6 +138,7 @@ Charts, tables and cards are drawn only from resolved data. Pass/fail marks come
 - [Results, adapters and bindings](docs/results-and-bindings.md): how a template refers to results
 - [Command line](docs/cli.md): commands, options, exit codes
 - [Running in a container](docs/container.md): build and run the image
+- [Render service](docs/service.md): the optional HTTP API and playground
 - [Output and conformance](docs/output-and-conformance.md): the evidence manifest and the 34 conformance cases
 
 **Background**
@@ -127,8 +147,7 @@ Charts, tables and cards are drawn only from resolved data. Pass/fail marks come
 
 **Project**
 - [Roadmap](docs/roadmap.md): what is planned, what is verified, open questions and quality requirements
-
-From a clone, `uv run pytest` runs the tests.
+- [Development](docs/development.md): set up a self-contained development environment, run the tests
 
 ## License
 

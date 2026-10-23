@@ -6,6 +6,7 @@
 #   podman run --rm -v "$PWD/out:/out:Z" reportspec render examples/model-release.report.md \
 #       --input examples/inputs/model-release.jsonl --format pdf -o /out/model-release.pdf
 #   podman run --rm reportspec conformance conformance
+#   podman run --rm -p 8000:8000 reportspec serve --host 0.0.0.0 --playground      # optional HTTP render service
 #
 # Fonts: the image installs only the fallback families (Liberation, DejaVu). Red Hat Text and Red Hat Mono come
 # from src/reportspec/fonts/ and are embedded byte for byte. Fedora's redhat-text-fonts / redhat-mono-fonts packages are NOT
@@ -32,7 +33,8 @@ RUN chown 1001:0 /opt/app-root/reportspec
 # uv is a build-time tool only: the entrypoint is the installed command, so the container runs offline with a read-only root.
 ENV UV_PYTHON_DOWNLOADS=never UV_PYTHON_PREFERENCE=only-system UV_CACHE_DIR=/tmp/uv-cache UV_PROJECT_ENVIRONMENT=/opt/app-root/venv
 USER 1001
-RUN uv sync --frozen --no-dev --no-editable \
+# --python: use the image's own interpreter, whatever the repository's .python-version (a development pin) says.
+RUN uv sync --frozen --no-dev --no-editable --extra service --python "$(command -v python3)" \
     && rm -rf /tmp/uv-cache \
     && chmod -R g=u /opt/app-root/venv /opt/app-root/reportspec   # OpenShift runs an arbitrary uid in group 0
 

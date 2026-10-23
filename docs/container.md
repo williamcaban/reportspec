@@ -40,6 +40,16 @@ podman run --rm reportspec render examples/quickstart.report.md --input examples
 
 The image's entry point is the `reportspec` command, so everything after the image name is a [CLI command](cli.md).
 
+## Run the render service
+
+The image includes the optional [render service](service.md). Start it, listening on all interfaces inside the container, and publish the port:
+
+```bash
+podman run --rm -p 8000:8000 --read-only --tmpfs /tmp reportspec serve --host 0.0.0.0 --playground
+```
+
+Then open `http://127.0.0.1:8000/` for the playground, or call the API (`/docs` lists it). The service renders PDF and DOCX inside the container, so the client needs nothing installed. Set `-e REPORTSPEC_API_TOKEN=...` to require a bearer token, and see [Render service](service.md) for the other settings. It prints a warning if it listens on a non-local address without a token; put it behind a gateway with TLS before exposing it beyond your machine.
+
 ## Run it on your own files
 
 Mount a folder into the container and write the output into it. PDF, HTML and DOCX need `-o`:
@@ -70,7 +80,7 @@ The report appears in `work/` next to a `report.manifest.json` evidence record.
 |---|---|
 | Base | Fedora Python image from `quay.io/fedora/`, referenced by tag (pinning by digest is on the [roadmap](roadmap.md)) |
 | Packages | `pango`, `pandoc`, `poppler-utils` (`pdffonts` for the font audit), Liberation and DejaVu fonts as fallbacks |
-| Python | A virtualenv at `/opt/app-root/venv`, built with `uv sync --frozen` from `uv.lock`. `uv` is used only while building |
+| Python | A virtualenv at `/opt/app-root/venv`, built with `uv sync --frozen --extra service` from `uv.lock`, using the image's own Python. `uv` is used only while building |
 | Fonts | Red Hat Text and Mono come from [`src/reportspec/fonts/`](../src/reportspec/fonts/README.md) and nowhere else. Fedora's RPMs for them are the same version but OTF, and having both would make the font name resolve to two different files |
 | User | Non-root (1001, group 0), so it also runs under OpenShift's arbitrary-uid rule |
 | Entry point | `reportspec` |
