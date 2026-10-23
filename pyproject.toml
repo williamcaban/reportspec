@@ -51,4 +51,4 @@ path = "src/reportspec/__init__.py"
 packages = ["src/reportspec"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src", "conformance", "examples", "README.md", "VISUAL-QA.md", "LICENSE", "NOTICE", "profiles", "Containerfile", "pyproject.toml", "uv.lock", "tests"]
+include = ["src", "conformance", "examples", "README.md", "VISUAL-QA.md", "LICENSE", "NOTICE", "docs", "Containerfile", "pyproject.toml", "uv.lock", "tests"]
