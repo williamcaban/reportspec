@@ -1,7 +1,8 @@
 __pycache__/
-*.pyc
-.venv/
-out/
-dist/
-.pytest_cache/
 .DS_Store
+.pytest_cache/
+.uv/
+.venv/
+*.pyc
+dist/
+out/

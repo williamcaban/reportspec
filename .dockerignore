@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+dist/
+.pytest_cache/
+examples/output/
+out/
+.git/
+.uv/
+.ruff_cache/
+.playwright-mcp/
