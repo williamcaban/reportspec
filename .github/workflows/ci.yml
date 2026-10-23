@@ -91,7 +91,7 @@ jobs:
         run: docker build -f Containerfile --build-arg PY=${{ matrix.python }} -t reportspec:ci .
 
       - name: Conformance, offline, read-only, arbitrary uid (the OpenShift conditions)
-        run: docker run --rm --network none --read-only --user 1234:0 reportspec:ci conformance conformance
+        run: docker run --rm --network none --read-only --tmpfs /tmp --user 1234:0 reportspec:ci conformance conformance
 
       - name: PDF render in the same conditions, then audit its fonts
         run: |
