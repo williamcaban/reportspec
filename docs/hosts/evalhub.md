@@ -91,7 +91,7 @@ CLI: `evalhub reportspec validate <file>` (offline), `evalhub report render -f <
 
 ## Open questions specific to EvalHub
 
-1. **Render location: decided (2026-10-23).** A standalone Python 3.13+ renderer, decoupled from the EvalHub server and shared with ASAGO: one implementation to secure instead of two. The EvalHub server does not port the template engine. How EvalHub reaches it (REST service, the SDK's `render_report`, or the CLI) is still open.
+1. **Render location: decided (2026-10-23).** A standalone Python 3.13+ renderer, decoupled from the EvalHub server and shared with ASAGO: one implementation to secure instead of two. The EvalHub server does not port the template engine. How EvalHub reaches it (the standalone [render service](../service.md), the SDK's `render_report`, or the CLI) is still open; the service exists as a proof of concept and is not tied to EvalHub.
 1a. **Spec registry location.** The sketch above puts `POST /api/v1/reportspecs` and an optional CRD in the EvalHub server. With an external renderer, either the server keeps storing the YAML and passes it to the renderer with each call, or the registry moves to the renderer service. The first keeps registry storage inside EvalHub and the second matches ASAGO's stateless model.
 2. **Direction source of truth.** Filling direction from provider config in the server adapter (recommended), or adding `lower_is_better` to `metrics_schema` so it travels with results.
 3. **Keeping breakdown data** (CIs, per-probe metadata) as `records`. This needs the SDK `report_results` change described above.

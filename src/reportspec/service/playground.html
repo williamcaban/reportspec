@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReportSpec Playground</title>
+<style>
+  :root { --bg:#fff; --fg:#151515; --muted:#5a5a5a; --line:#c7c7c7; --panel:#f5f5f5; --accent:#0066cc; --bad:#b1380b; --ok:#3d7317; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#151515; --fg:#f0f0f0; --muted:#a8a8a8; --line:#3c3f42; --panel:#1f1f1f; --accent:#4394e5; --bad:#ff7e51; --ok:#92d400; } }
+  :root[data-theme="light"] { --bg:#fff; --fg:#151515; --muted:#5a5a5a; --line:#c7c7c7; --panel:#f5f5f5; --accent:#0066cc; --bad:#b1380b; --ok:#3d7317; }
+  :root[data-theme="dark"] { --bg:#151515; --fg:#f0f0f0; --muted:#a8a8a8; --line:#3c3f42; --panel:#1f1f1f; --accent:#4394e5; --bad:#ff7e51; --ok:#92d400; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; }
+  header, main { max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+  header { padding-top: 16px; }
+  h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .note { color: var(--muted); margin: 0 0 12px; }
+  .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  label { display:block; font-weight:600; margin: 8px 0 4px; }
+  textarea, input { width:100%; background:var(--panel); color:var(--fg); border:1px solid var(--line); border-radius:4px; padding:8px; font:13px/1.4 ui-monospace, Menlo, monospace; }
+  textarea { min-height: 300px; resize: vertical; }
+  textarea.small { min-height: 64px; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; margin: 12px 0; align-items:center; }
+  button { background:var(--accent); color:#fff; border:0; border-radius:4px; padding:8px 14px; font:inherit; cursor:pointer; }
+  button.secondary { background:transparent; color:var(--accent); border:1px solid var(--accent); }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  #status { min-height: 1.5em; white-space: pre-wrap; }
+  .bad { color: var(--bad); } .ok { color: var(--ok); }
+  iframe { width:100%; height: 720px; border:1px solid var(--line); border-radius:4px; background:#fff; }
+  details { margin: 8px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>ReportSpec Playground</h1>
+  <p class="note">Proof of concept. Paste a template and results, then render. Nothing is stored; the server keeps no copy of what you send.</p>
+</header>
+<main>
+  <div class="grid">
+    <div><label for="spec">Template (.report.md)</label><textarea id="spec" spellcheck="false"></textarea></div>
+    <div><label for="data">Results (JSONL, one object per line)</label><textarea id="data" spellcheck="false"></textarea></div>
+  </div>
+  <details>
+    <summary>Parameters and access token</summary>
+    <label for="params">Parameter overrides, one NAME=VALUE per line</label>
+    <textarea id="params" class="small" spellcheck="false" placeholder="min_accuracy=0.5"></textarea>
+    <label for="token">Bearer token (only if the server requires one)</label>
+    <input id="token" type="password" autocomplete="off">
+  </details>
+  <div class="row">
+    <button id="preview">Render preview</button>
+    <button id="validate" class="secondary">Validate template</button>
+    <button id="pdf" class="secondary" data-format="pdf">Download PDF</button>
+    <button id="docx" class="secondary" data-format="docx">Download DOCX</button>
+    <button id="markdown" class="secondary" data-format="markdown">Download Markdown</button>
+    <button id="json" class="secondary" data-format="json">Download manifest</button>
+  </div>
+  <div id="status" role="status"></div>
+  <iframe id="frame" sandbox title="Report preview"></iframe>
+</main>
+<script>
+const SPEC = __SPEC__, DATA = __DATA__;
+const $ = id => document.getElementById(id);
+$("spec").value = SPEC; $("data").value = DATA;
+
+function say(text, cls) { const s = $("status"); s.textContent = text; s.className = cls || ""; }
+function headers() { const h = {"Content-Type": "application/json"}; const t = $("token").value; if (t) h.Authorization = "Bearer " + t; return h; }
+function params() {
+  const out = {};
+  for (const line of $("params").value.split("\n")) {
+    const i = line.indexOf("="); if (i > 0) out[line.slice(0, i).trim()] = line.slice(i + 1).trim();
+  }
+  return out;
+}
+async function call(path, body) {
+  const r = await fetch(path, {method: "POST", headers: headers(), body: JSON.stringify(body)});
+  if (!r.ok) {
+    let msg = r.status + " " + r.statusText;
+    try { msg = (await r.json()).error.message; } catch (e) {}
+    throw new Error(msg);
+  }
+  return r;
+}
+function request(format) { return {spec: $("spec").value, inputs: [{content: $("data").value, adapter: "jsonl"}], params: params(), format}; }
+
+$("validate").onclick = async () => {
+  say("Validating...");
+  try {
+    const v = await (await call("/v1/validate", {spec: $("spec").value})).json();
+    const lines = v.errors.map(e => "error: " + e).concat(v.warnings.map(w => "warning: " + w));
+    say((v.valid ? "Valid." : "Invalid.") + (lines.length ? "\n" + lines.join("\n") : ""), v.valid ? "ok" : "bad");
+  } catch (e) { say(e.message, "bad"); }
+};
+$("preview").onclick = async () => {
+  say("Rendering...");
+  try {
+    const r = await call("/v1/render", request("html"));
+    $("frame").srcdoc = await r.text();
+    const w = r.headers.get("X-ReportSpec-Warnings");
+    say("Rendered." + (w && w !== "0" ? " " + w + " warning(s); use Validate to see them." : ""), "ok");
+  } catch (e) { say(e.message, "bad"); }
+};
+for (const b of document.querySelectorAll("button[data-format]")) {
+  b.onclick = async () => {
+    const f = b.dataset.format; say("Rendering " + f + "...");
+    try {
+      const r = await call("/v1/render", request(f));
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(await r.blob());
+      a.download = "report." + ({markdown: "md"}[f] || f);
+      a.click(); URL.revokeObjectURL(a.href);
+      say("Downloaded report." + ({markdown: "md"}[f] || f), "ok");
+    } catch (e) { say(e.message, "bad"); }
+  };
+}
+fetch("/v1/capabilities", {headers: headers()}).then(r => r.ok ? r.json() : null).then(c => {
+  if (!c) return;
+  for (const f of ["pdf", "docx"]) if (!c.formats.includes(f)) { $(f).disabled = true; $(f).title = "Not available on this server"; }
+}).catch(() => {});
+</script>
+</body>
+</html>

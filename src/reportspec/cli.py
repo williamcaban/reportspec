@@ -17,6 +17,7 @@ DESCRIPTION = """ReportSpec v1alpha1 (DRAFT): render a Markdown report template 
   reportspec bundle --input examples/inputs/evalhub-job.json
   reportspec render examples/model-release.report.md --input examples/inputs/model-release.jsonl --format pdf -o model-release.pdf
   reportspec conformance conformance/
+  reportspec serve --playground        (optional HTTP render service; needs: pip install "reportspec[service]")
 """
 
 
@@ -37,6 +38,11 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--param", action="append", default=[], metavar="NAME=VALUE")
     c = sub.add_parser("conformance")
     c.add_argument("dir", type=Path)
+    s = sub.add_parser("serve", help="run the optional HTTP render service (needs the 'service' extra)")
+    s.add_argument("--host", default="127.0.0.1", help="interface to listen on (default 127.0.0.1; use 0.0.0.0 in a container)")
+    s.add_argument("--port", type=int, default=8000)
+    s.add_argument("--playground", action="store_true", help="also serve a web page at / for trying templates (or REPORTSPEC_PLAYGROUND=1)")
+    s.add_argument("--no-docs", action="store_true", help="do not serve /docs and /openapi.json")
     a = ap.parse_args(argv)
     bad = [p for p in getattr(a, "param", []) if "=" not in p]
     if bad:
@@ -44,6 +50,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if a.cmd == "conformance":
         return run_conformance(a.dir)
+    if a.cmd == "serve":
+        return _serve(a)
     if a.cmd == "render" and a.format in ("pdf", "docx") and not a.output:
         print(f"failed: --format {a.format} needs -o OUTPUT.{a.format}", file=sys.stderr)
         return 2
@@ -84,4 +92,23 @@ def main(argv: list[str] | None = None) -> int:
     except (SpecError, MissingValueError) as e:
         print(f"failed: {e}", file=sys.stderr)
         return 2
+    return 0
+
+
+def _serve(a: argparse.Namespace) -> int:
+    try:
+        import uvicorn
+
+        from .service.app import create_app
+        from .service.settings import Settings
+    except ImportError:
+        print('failed: the render service needs its optional dependencies: pip install "reportspec[service]"', file=sys.stderr)
+        return 2
+    settings = Settings()  # REPORTSPEC_* environment variables
+    settings.playground = settings.playground or a.playground
+    settings.docs = settings.docs and not a.no_docs
+    if settings.api_token is None and a.host not in ("127.0.0.1", "localhost", "::1"):
+        print(f"warning: listening on {a.host} with no REPORTSPEC_API_TOKEN: anyone who can reach this port can render. "
+              "Put it behind a gateway or set a token.", file=sys.stderr)
+    uvicorn.run(create_app(settings), host=a.host, port=a.port)
     return 0

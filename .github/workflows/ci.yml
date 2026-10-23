@@ -18,6 +18,8 @@ jobs:
     name: test (py${{ matrix.python }})
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    env:
+      UV_PYTHON: ${{ matrix.python }}   # beats the repository's .python-version, so each matrix job really uses its own Python
     strategy:
       fail-fast: false
       matrix:
@@ -39,7 +41,7 @@ jobs:
       - name: Install locked dependencies
         run: |
           uv lock --check
-          uv sync --frozen --python ${{ matrix.python }}
+          uv sync --frozen --all-extras
 
       - name: Lint
         run: uv run --frozen ruff check src tests
@@ -52,6 +54,17 @@ jobs:
 
       - name: Build wheel and sdist
         run: uv build --out-dir dist
+
+      - name: Wheel installs with the service extra and `serve` starts
+        run: |
+          uv venv --python ${{ matrix.python }} "$RUNNER_TEMP/svc"
+          uv pip install --python "$RUNNER_TEMP/svc/bin/python" "$(ls dist/*.whl)[service]"
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/svc/bin/reportspec" serve --port 8123 &
+          pid=$!
+          for i in $(seq 1 30); do curl -fs http://127.0.0.1:8123/healthz && break; sleep 1; done
+          curl -fs http://127.0.0.1:8123/v1/capabilities
+          kill $pid
 
       - name: Wheel works from a clean environment, outside the checkout
         run: |
@@ -100,3 +113,20 @@ jobs:
             render examples/model-release.report.md --input examples/inputs/model-release.jsonl --format pdf -o /out/model-release.pdf
           pdffonts out/model-release.pdf | tee out/fonts.txt
           if tail -n +3 out/fonts.txt | grep -v "Red-Hat-"; then echo "non Red Hat font in the PDF"; exit 1; fi
+
+      - name: The render service in the same conditions (HTTP in, PDF out), then audit the fonts
+        run: |
+          docker run -d --name svc -p 8000:8000 --read-only --tmpfs /tmp --user 1234:0 reportspec:ci serve --host 0.0.0.0
+          for i in $(seq 1 30); do curl -fs http://127.0.0.1:8000/healthz && break; sleep 1; done
+          curl -fs http://127.0.0.1:8000/v1/capabilities
+          python3 - <<'PY' > req.json
+          import json
+          print(json.dumps({"spec": open("examples/quickstart.report.md").read(),
+                            "inputs": [{"content": open("examples/inputs/quickstart.jsonl").read(), "adapter": "jsonl"}],
+                            "format": "pdf"}))
+          PY
+          curl -fs -X POST http://127.0.0.1:8000/v1/render -H 'content-type: application/json' --data @req.json -o out/service.pdf
+          pdffonts out/service.pdf | tee out/service-fonts.txt
+          if tail -n +3 out/service-fonts.txt | grep -v "Red-Hat-"; then echo "non Red Hat font in the PDF"; exit 1; fi
+          docker logs svc
+          docker rm -f svc

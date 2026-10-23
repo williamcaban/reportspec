@@ -1,6 +1,6 @@
 # Hosts
 
-A host is a product that runs ReportSpec. The core spec is host-neutral; each host adds adapters, a namespace and an API. Host pages: [EvalHub](evalhub.md), [ASAGO](asago.md).
+A host is a product that runs ReportSpec. Any host can also call the standalone [render service](../service.md), which is not tied to a particular one. The core spec is host-neutral; each host adds adapters, a namespace and an API. Host pages: [EvalHub](evalhub.md), [ASAGO](asago.md).
 
 ## What a host must provide
 
