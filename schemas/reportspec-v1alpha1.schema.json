@@ -1,0 +1,1141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:reportspec:schema:v1alpha1:frontmatter",
+  "title": "ReportSpec front matter",
+  "description": "ReportSpec v1alpha1 (DRAFT), host-neutral core. A ReportSpec is one Markdown file: YAML front matter (validated by this schema) followed by a Markdown body that is the template, written in a restricted Jinja-like language with ```reportspec-viz fenced blocks. Bindings resolve against a ResultsBundle (results-bundle-v1alpha1.schema.json), never against a host's native result format. Each viz block body is validated against #/$defs/vizBlock after extraction.",
+  "type": "object",
+  "required": [
+    "title",
+    "version",
+    "reportspec"
+  ],
+  "additionalProperties": {
+    "type": "object",
+    "description": "Host namespace (for example `evalhub:` or `asago:`). Opaque to the core: it is excluded from meta.*, ignored by other hosts, and validated only by the host that owns it. Unknown top-level keys that are not mappings are rejected, so typos in document keys surface."
+  },
+  "properties": {
+    "title": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "subtitle": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(-[0-9A-Za-z.-]+)?$",
+      "description": "SemVer of this spec."
+    },
+    "authors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Authoring date. Render time is report.generated_at."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    },
+    "lang": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]+)*$",
+      "default": "en"
+    },
+    "params": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/identifier"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/parameter"
+      },
+      "maxProperties": 64
+    },
+    "format": {
+      "$ref": "#/$defs/formatOptions"
+    },
+    "reportspec": {
+      "$ref": "#/$defs/reportspec"
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "description": "Name usable as a template variable. Lowercase snake_case; must not collide with reserved names.",
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,62}$",
+      "not": {
+        "enum": [
+          "meta",
+          "params",
+          "report",
+          "subject",
+          "run",
+          "loop",
+          "true",
+          "false",
+          "none",
+          "missing"
+        ]
+      }
+    },
+    "jsonPath": {
+      "description": "RFC 9535 JSONPath, evaluated against the ResultsBundle (results-bundle-v1alpha1.schema.json). An escape hatch: prefer metric/records/field references, which survive changes to bundle layout.",
+      "type": "string",
+      "pattern": "^\\$",
+      "maxLength": 1024
+    },
+    "direction": {
+      "description": "Polarity of the metric. Drives pass/fail coloring and threshold comparison (e.g. toxicity is lower_is_better).",
+      "enum": [
+        "higher_is_better",
+        "lower_is_better"
+      ]
+    },
+    "numberRef": {
+      "description": "A literal number, a parameter reference, or a scalar binding reference.",
+      "oneOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "object",
+          "required": [
+            "param"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "param": {
+              "$ref": "#/$defs/identifier"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": [
+            "binding"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "binding": {
+              "$ref": "#/$defs/identifier"
+            }
+          }
+        }
+      ]
+    },
+    "parameter": {
+      "description": "R Markdown / Quarto convention. Short form `name: <default>` (type inferred) or long form `name: {value, type, description, choices, overridable}`. Overridable at render time (--param name=value); overrides are recorded in the evidence manifest.",
+      "oneOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean"
+          ]
+        },
+        {
+          "type": "object",
+          "required": [
+            "value"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            },
+            "type": {
+              "enum": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            },
+            "label": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "choices": {
+              "type": "array",
+              "minItems": 1
+            },
+            "overridable": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        }
+      ]
+    },
+    "vizBlock": {
+      "$comment": "Validates the YAML body of each ```reportspec-viz fenced block.",
+      "type": "object",
+      "required": [
+        "id",
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "radar",
+            "bar",
+            "line",
+            "heatmap",
+            "table",
+            "summary_cards",
+            "boxplot",
+            "radial"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "radar"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/vizRadar"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "bar"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/vizBar"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "line"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/vizLine"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "heatmap"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/vizHeatmap"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "table"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/vizTable"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "summary_cards"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/vizSummaryCards"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "boxplot"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/vizBoxplot"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "radial"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/vizRadial"
+          }
+        }
+      ]
+    },
+    "vizCommon": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,62}$",
+          "description": "Unique within the template; used as the HTML anchor and in the evidence manifest."
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "caption": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "alt": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Accessible text. Generated from data if omitted."
+        }
+      }
+    },
+    "range": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "palette": {
+      "enum": [
+        "auto",
+        "status",
+        "sequential",
+        "diverging",
+        "categorical"
+      ],
+      "description": "Semantic intent only; the renderer owns actual colors."
+    },
+    "vizRadar": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/vizCommon"
+        }
+      ],
+      "required": [
+        "id",
+        "type",
+        "data"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "radar"
+        },
+        "data": {
+          "$ref": "#/$defs/identifier",
+          "description": "series binding"
+        },
+        "range": {
+          "$ref": "#/$defs/range"
+        },
+        "fill": {
+          "type": "boolean",
+          "default": true
+        },
+        "threshold": {
+          "$ref": "#/$defs/numberRef"
+        },
+        "direction": {
+          "$ref": "#/$defs/direction"
+        }
+      }
+    },
+    "vizBar": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/vizCommon"
+        }
+      ],
+      "required": [
+        "id",
+        "type",
+        "data"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "bar"
+        },
+        "data": {
+          "$ref": "#/$defs/identifier",
+          "description": "series binding"
+        },
+        "orientation": {
+          "enum": [
+            "vertical",
+            "horizontal"
+          ],
+          "default": "vertical"
+        },
+        "range": {
+          "$ref": "#/$defs/range"
+        },
+        "threshold": {
+          "$ref": "#/$defs/numberRef"
+        },
+        "direction": {
+          "$ref": "#/$defs/direction"
+        },
+        "sort": {
+          "enum": [
+            "none",
+            "asc",
+            "desc"
+          ],
+          "default": "none"
+        },
+        "palette": {
+          "$ref": "#/$defs/palette"
+        },
+        "x_label": {
+          "type": "string"
+        },
+        "y_label": {
+          "type": "string"
+        }
+      }
+    },
+    "vizLine": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/vizCommon"
+        }
+      ],
+      "required": [
+        "id",
+        "type",
+        "data"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "line"
+        },
+        "data": {
+          "$ref": "#/$defs/identifier",
+          "description": "series binding; order is preserved"
+        },
+        "range": {
+          "$ref": "#/$defs/range"
+        },
+        "threshold": {
+          "$ref": "#/$defs/numberRef"
+        },
+        "x_label": {
+          "type": "string"
+        },
+        "y_label": {
+          "type": "string"
+        },
+        "direction": {
+          "$ref": "#/$defs/direction"
+        }
+      }
+    },
+    "vizHeatmap": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/vizCommon"
+        }
+      ],
+      "required": [
+        "id",
+        "type",
+        "data"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "heatmap"
+        },
+        "data": {
+          "$ref": "#/$defs/identifier",
+          "description": "matrix binding"
+        },
+        "range": {
+          "$ref": "#/$defs/range"
+        },
+        "palette": {
+          "enum": [
+            "sequential",
+            "diverging"
+          ],
+          "default": "sequential"
+        },
+        "midpoint": {
+          "$ref": "#/$defs/numberRef"
+        },
+        "direction": {
+          "$ref": "#/$defs/direction"
+        },
+        "show_values": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "vizTable": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/vizCommon"
+        }
+      ],
+      "required": [
+        "id",
+        "type",
+        "data"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "table"
+        },
+        "data": {
+          "$ref": "#/$defs/identifier",
+          "description": "table binding"
+        },
+        "columns": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "field"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "field": {
+                "$ref": "#/$defs/identifier"
+              },
+              "label": {
+                "type": "string"
+              },
+              "precision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 6
+              },
+              "align": {
+                "enum": [
+                  "left",
+                  "center",
+                  "right"
+                ]
+              },
+              "display": {
+                "$ref": "#/$defs/display"
+              }
+            }
+          }
+        },
+        "sort_by": {
+          "type": "object",
+          "required": [
+            "field"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "field": {
+              "$ref": "#/$defs/identifier"
+            },
+            "order": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "asc"
+            }
+          }
+        },
+        "status_field": {
+          "$ref": "#/$defs/identifier",
+          "description": "Boolean field rendered as PASS/FAIL badges (see status_pass_when)."
+        },
+        "sortable": {
+          "type": "boolean",
+          "default": true
+        },
+        "status_pass_when": {
+          "type": "boolean",
+          "default": true,
+          "description": "Which value of status_field is a PASS. false for fields where true is bad, such as attack_succeeded."
+        }
+      }
+    },
+    "vizSummaryCards": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/vizCommon"
+        }
+      ],
+      "required": [
+        "id",
+        "type",
+        "cards"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "summary_cards"
+        },
+        "cards": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "required": [
+              "label",
+              "value"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "$ref": "#/$defs/identifier",
+                "description": "scalar binding"
+              },
+              "precision": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 6
+              },
+              "threshold": {
+                "$ref": "#/$defs/numberRef"
+              },
+              "direction": {
+                "$ref": "#/$defs/direction"
+              },
+              "display": {
+                "$ref": "#/$defs/display"
+              }
+            }
+          }
+        }
+      }
+    },
+    "formatOptions": {
+      "description": "Quarto convention: the presence of a key under `format` enables that output. Value is an options object, or `default` / {}.",
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "html": {
+          "oneOf": [
+            {
+              "const": "default"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "toc": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "interactive": {
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            }
+          ]
+        },
+        "pdf": {
+          "oneOf": [
+            {
+              "const": "default"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "toc": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "page_size": {
+                  "enum": [
+                    "letter",
+                    "a4"
+                  ],
+                  "default": "letter"
+                },
+                "orientation": {
+                  "enum": [
+                    "portrait",
+                    "landscape"
+                  ],
+                  "default": "portrait"
+                }
+              }
+            }
+          ]
+        },
+        "markdown": {
+          "oneOf": [
+            {
+              "const": "default"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "viz": {
+                  "enum": [
+                    "image",
+                    "table",
+                    "omit"
+                  ],
+                  "default": "table",
+                  "description": "How viz blocks degrade in Markdown output (e.g. CI PR comments)."
+                }
+              }
+            }
+          ]
+        },
+        "json": {
+          "oneOf": [
+            {
+              "const": "default"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "include_source_paths": {
+                  "type": "boolean",
+                  "default": true
+                }
+              }
+            }
+          ]
+        },
+        "docx": {
+          "oneOf": [
+            {
+              "const": "default"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "toc": {
+                  "type": "boolean",
+                  "default": false
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "display": {
+      "description": "Display hint applied when the value is interpolated or charted. Renderer owns locale details. (Named `display` so it does not clash with the Quarto-style top-level `format:` key.)",
+      "enum": [
+        "number",
+        "integer",
+        "percent",
+        "text",
+        "boolean",
+        "datetime"
+      ]
+    },
+    "evaluationId": {
+      "description": "Evaluation id as it appears in ResultsBundle.evaluations[].id (an EvalHub benchmark id, a MiDojo suite such as midojo.weather, a Policy Mapper run such as policy-mapper.fs-isac).",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "metricRef": {
+      "description": "`<evaluation>/<metric>`. `/` is the separator because metric names contain dots (promptinject.HijackHateHumans_asr) and commas (acc,none). At most one `*` wildcard, in either part, turns the reference into a series labeled by what `*` matched: owasp_llm_top10/*_asr (metrics of one evaluation) or */acc (one metric across evaluations).",
+      "type": "string",
+      "maxLength": 256,
+      "pattern": "^(?=[^*]*\\*?[^*]*$)[^/\\s]+/[^/\\s]+$"
+    },
+    "recordsRef": {
+      "description": "`<evaluation>/<record set>` (e.g. midojo.weather/pairs, policy-mapper.fs-isac/risks), or a built-in record set: `@evaluations` (one row per evaluation: id, label, source, metric, score, threshold, pass).",
+      "type": "string",
+      "maxLength": 256,
+      "pattern": "^(@evaluations|[A-Za-z0-9][A-Za-z0-9_.:-]*/[A-Za-z0-9_]+)$"
+    },
+    "fieldName": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+      "description": "A field of a record (plain name, no path)."
+    },
+    "fieldPath": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_-]*(\\.[A-Za-z_][A-Za-z0-9_-]*)*$",
+      "maxLength": 256,
+      "description": "Dotted path inside one evaluation object, e.g. verdict.threshold or attributes.env_card.gpu_model. Each segment is a key; there are no wildcards."
+    },
+    "bindingDecl": {
+      "description": "Short forms: a metric reference string (scalar, or series when it has a `*`); a list of binding names or metric references (series, labeled by evaluation label and metric). Long form: an object. A built-in (overall_score, overall_threshold, overall_pass, evaluations) may be listed with options only, e.g. `overall_pass: {required: true}`.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/metricRef"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/identifier"
+              },
+              {
+                "$ref": "#/$defs/metricRef"
+              }
+            ]
+          }
+        },
+        {
+          "$ref": "#/$defs/binding"
+        }
+      ]
+    },
+    "binding": {
+      "description": "Long form. Exactly one source: metric, items, evaluation+field, records, or from. `type` is inferred from the source and may be stated for clarity; it is required with `from` (scalar or table only). records+fields is a table; records+row with column+value (long) or columns (wide) is a matrix. The validator enforces these combinations.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "scalar",
+            "series",
+            "matrix",
+            "table"
+          ]
+        },
+        "metric": {
+          "$ref": "#/$defs/metricRef"
+        },
+        "items": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "required": [
+              "label"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "label": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "binding": {
+                "$ref": "#/$defs/identifier"
+              },
+              "metric": {
+                "$ref": "#/$defs/metricRef"
+              }
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "binding"
+                ]
+              },
+              {
+                "required": [
+                  "metric"
+                ]
+              }
+            ]
+          }
+        },
+        "evaluation": {
+          "$ref": "#/$defs/evaluationId"
+        },
+        "field": {
+          "$ref": "#/$defs/fieldPath"
+        },
+        "records": {
+          "$ref": "#/$defs/recordsRef"
+        },
+        "fields": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 64,
+          "propertyNames": {
+            "$ref": "#/$defs/identifier"
+          },
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/fieldName"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "field"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "field": {
+                    "$ref": "#/$defs/fieldName"
+                  },
+                  "display": {
+                    "$ref": "#/$defs/display"
+                  },
+                  "precision": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 6
+                  },
+                  "direction": {
+                    "$ref": "#/$defs/direction"
+                  }
+                }
+              }
+            ]
+          },
+          "description": "Table: output field -> record field."
+        },
+        "row": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "column": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "value": {
+          "$ref": "#/$defs/fieldName"
+        },
+        "columns": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 64,
+          "additionalProperties": {
+            "$ref": "#/$defs/fieldName"
+          },
+          "description": "Wide matrix: column label -> record field."
+        },
+        "maxRows": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000,
+          "default": 1000
+        },
+        "from": {
+          "$ref": "#/$defs/jsonPath"
+        },
+        "description": {
+          "type": "string"
+        },
+        "display": {
+          "$ref": "#/$defs/display"
+        },
+        "precision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6
+        },
+        "unit": {
+          "type": "string",
+          "maxLength": 32
+        },
+        "direction": {
+          "$ref": "#/$defs/direction"
+        },
+        "required": {
+          "type": "boolean",
+          "default": false,
+          "description": "An unresolved binding fails the render regardless of on_missing."
+        },
+        "default": {
+          "description": "Scalar only. Makes the binding never-missing; use sparingly in compliance reports."
+        }
+      }
+    },
+    "reportspec": {
+      "description": "Core namespace. Host-specific settings (EvalHub collections, ASAGO stages, publishing) go in a top-level host namespace instead, so the same file renders on any conforming host.",
+      "type": "object",
+      "required": [
+        "version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": "v1alpha1",
+          "description": "ReportSpec core version."
+        },
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?$",
+          "description": "Stable ID across versions. Defaults to the file slug (foo.report.md -> foo), like Jekyll/Hugo slugs."
+        },
+        "audience": {
+          "enum": [
+            "compliance",
+            "developer",
+            "executive",
+            "security",
+            "other"
+          ],
+          "description": "One ReportSpec = one audience (design decision: no multi-view specs)."
+        },
+        "on_missing": {
+          "enum": [
+            "marker",
+            "fail"
+          ],
+          "default": "marker",
+          "description": "marker: unresolved bindings print missing_marker but can never be compared (see README). fail: any unresolved binding fails the render."
+        },
+        "missing_marker": {
+          "type": "string",
+          "maxLength": 64,
+          "default": "data unavailable"
+        },
+        "strict": {
+          "type": "boolean",
+          "default": false,
+          "description": "Warnings become errors."
+        },
+        "bindings": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/identifier"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/bindingDecl"
+          },
+          "minProperties": 0,
+          "maxProperties": 256
+        }
+      }
+    },
+    "vizBoxplot": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/vizCommon"
+        }
+      ],
+      "required": [
+        "id",
+        "type",
+        "data",
+        "x",
+        "y"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "boxplot"
+        },
+        "data": {
+          "$ref": "#/$defs/identifier",
+          "description": "table binding with one row per sample"
+        },
+        "x": {
+          "$ref": "#/$defs/identifier",
+          "description": "table field that names the group (one box per distinct value)"
+        },
+        "y": {
+          "$ref": "#/$defs/identifier",
+          "description": "numeric table field that holds the sample value; null samples are excluded and counted as N/A"
+        },
+        "range": {
+          "$ref": "#/$defs/range"
+        },
+        "threshold": {
+          "$ref": "#/$defs/numberRef"
+        },
+        "direction": {
+          "$ref": "#/$defs/direction"
+        },
+        "x_label": {
+          "type": "string"
+        },
+        "y_label": {
+          "type": "string"
+        }
+      }
+    },
+    "vizRadial": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/vizCommon"
+        }
+      ],
+      "required": [
+        "id",
+        "type",
+        "data"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "radial"
+        },
+        "data": {
+          "$ref": "#/$defs/identifier",
+          "description": "series binding; one ring per item"
+        },
+        "range": {
+          "$ref": "#/$defs/range"
+        },
+        "threshold": {
+          "$ref": "#/$defs/numberRef"
+        },
+        "direction": {
+          "$ref": "#/$defs/direction"
+        },
+        "sort": {
+          "enum": [
+            "none",
+            "asc",
+            "desc"
+          ],
+          "default": "none"
+        }
+      }
+    }
+  }
+}

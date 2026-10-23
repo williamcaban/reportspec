@@ -1,0 +1,7 @@
+description: acc,none matches an MLflow-sanitized key acc_none
+inputs:
+- ../inputs/mini-bundle.json
+expect:
+  render: ok
+  markdown_contains:
+  - MMLU 61.0%

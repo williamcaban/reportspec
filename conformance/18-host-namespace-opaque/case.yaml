@@ -1,0 +1,5 @@
+description: host namespaces are not part of meta.*
+expect:
+  validate: invalid
+  errors_contain:
+  - meta.evalhub is not defined

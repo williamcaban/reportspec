@@ -1,0 +1,2823 @@
+{
+ "_comment": "Shape: asago-policy-mapper risk-extraction.json (version 0.3), trimmed from asago-examples b79020d asago-scenario-generator/inputs/risk-extractions/risk-extraction-fs-isac.json. Kept: all 49 risks with one evidence item each (text cut to 200 chars) and all mitigations (action_id, source, category only), source document basenames, model, eval block. Dropped: chunks, llm_calls, grounding_filtered_candidates, retrieval_stats, absolute local paths. The eval block exists only when the extraction ran against a ground-truth annotation.",
+ "version": "0.3",
+ "risks": [
+  {
+   "risk_id": "atlas-generated-content-ownership",
+   "risk_name": "Generated content ownership and IP",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.9539,
+   "grounding_confidence": "high",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "Invalidate some uses of the output for proprietary or copyrighted work",
+     "document": "fs-isac.pdf",
+     "page": 11,
+     "section": "Representation as the Employee or Company"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "aiuc1-req-a002",
+     "source": "aiuc1",
+     "category": "technical"
+    }
+   ]
+  },
+  {
+   "risk_id": "credo-risk-026",
+   "risk_name": "Fraud, scams, and targeted manipulation",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.9475,
+   "grounding_confidence": "high",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "generative AI has the power to increase cyber crime through convincing mimicking of existing communications, excellent translation capabilities, deep fake images, audio, and video",
+     "document": "fs-isac.pdf",
+     "page": 7,
+     "section": "Responsibility"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "atlas-hallucination",
+   "risk_name": "Hallucination",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.9439,
+   "grounding_confidence": "high",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "These systems may 'hallucinate' when their answers appear convincing but are completely wrong.",
+     "document": "fs-isac.pdf",
+     "page": 10,
+     "section": "Accuracy"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-04-08",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-09-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-09-02",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-09-03",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-09-04",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "MG-3.1-001",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-4.1-002",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-2.3-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-2.3-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.5-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.5-005",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-d001",
+     "source": "aiuc1",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-d002",
+     "source": "aiuc1",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-e003",
+     "source": "aiuc1",
+     "category": "governance"
+    }
+   ]
+  },
+  {
+   "risk_id": "credo-risk-036",
+   "risk_name": "Compromised personally identifiable information (Slattery et al., 2024)",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.9426,
+   "grounding_confidence": "high",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "Limiting or obfuscating the data if it has Personally Identifiable Informa -tion (PII)",
+     "document": "fs-isac.pdf",
+     "page": 5,
+     "section": "Confidentiality"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "credo-risk-037",
+   "risk_name": "Compromised sensitive information (Slattery et al., 2024; IBM, 2024; AI, 2023)",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.9388,
+   "grounding_confidence": "high",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "Queries with sensitive data put companies at significant risk.",
+     "document": "fs-isac.pdf",
+     "page": 5,
+     "section": "Confidentiality"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "credo-risk-010",
+   "risk_name": "Stereotype perpetuation (Slattery et al., 2024; IBM, 2024)",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.9355,
+   "grounding_confidence": "medium",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "Employees must check that the output does not lead to: > Poor, biased, and/or unethical business practices or decisions",
+     "document": "fs-isac.pdf",
+     "page": 10,
+     "section": "Accuracy"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "ai-risk-taxonomy-unauthorized-disclosure---pii-(personal-identifiable-information)",
+   "risk_name": "Unauthorized disclosure - PII (Personal Identifiable Information)",
+   "taxonomy": "ai-risk-taxonomy",
+   "confidence": 0.9333,
+   "grounding_confidence": "high",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "Limiting or obfuscating the data if it has Personally Identifiable Informa -tion (PII)",
+     "document": "fs-isac.pdf",
+     "page": 4,
+     "section": "Defining External Generative AI"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "ai-risk-taxonomy-unauthorized-disclosure---financial-records",
+   "risk_name": "Unauthorized disclosure - Financial records",
+   "taxonomy": "ai-risk-taxonomy",
+   "confidence": 0.9333,
+   "grounding_confidence": "high",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "Customers trust financial institutions with their financial data and transactions.",
+     "document": "fs-isac.pdf",
+     "page": 4,
+     "section": "Defining External Generative AI"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "atlas-personal-information-in-data",
+   "risk_name": "Personal information in data",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.9304,
+   "grounding_confidence": "medium",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "Currently, most external generative AI systems use queries for future training (although some systems allow opt-outs).",
+     "document": "fs-isac.pdf",
+     "page": 5,
+     "section": "Confidentiality"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-02-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-02-04",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-4.1-009",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-a006",
+     "source": "aiuc1",
+     "category": "technical"
+    }
+   ]
+  },
+  {
+   "risk_id": "credo-risk-021",
+   "risk_name": "False or misleading information",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.9209,
+   "grounding_confidence": "high",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "Distortion of statistics or other facts may lead to employees making public claims or key decisions based on erroneous information.",
+     "document": "fs-isac.pdf",
+     "page": 10,
+     "section": "Accuracy"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "credo-risk-016",
+   "risk_name": "Over or under-reliance and unsafe use (Slattery et al., 2024; IBM, 2024; AI, 2023)",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.9196,
+   "grounding_confidence": "high",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "Users should not rely on their accuracy.",
+     "document": "fs-isac.pdf",
+     "page": 9,
+     "section": "Monitoring"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "atlas-exposing-personal-information",
+   "risk_name": "Exposing personal information",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.9188,
+   "grounding_confidence": "high",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "The service may preserve the queries, which hackers could breach and release.",
+     "document": "fs-isac.pdf",
+     "page": 5,
+     "section": "Confidentiality"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-02-03",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-02-09",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-08-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-2.2-009",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-4.1-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-4.1-009",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.2-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.2-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-a005",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-a006",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-b009",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-e001",
+     "source": "aiuc1",
+     "category": "governance"
+    }
+   ]
+  },
+  {
+   "risk_id": "mit-ai-risk-subdomain-2.1",
+   "risk_name": "Compromise of privacy by obtaining, leaking or correctly inferring sensitive information",
+   "taxonomy": "mit-ai-risk-repository",
+   "confidence": 0.9107,
+   "grounding_confidence": "high",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "Currently, most external generative AI systems use queries for future training (although some systems allow opt-outs). The service may preserve the queries, which hackers could breach and release. Que\u2026",
+     "document": "fs-isac.pdf",
+     "page": 4,
+     "section": "Introduction"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-02-02",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-02-06",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    },
+    {
+     "action_id": "aiuc1-req-a004",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-02-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-02-03",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-02-09",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-08-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-2.2-009",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-4.1-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-4.1-009",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.2-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.2-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-a005",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-a006",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-b009",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-e001",
+     "source": "aiuc1",
+     "category": "governance"
+    },
+    {
+     "action_id": "owasp-llm-act-02-04",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-02-05",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-07-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "GV-1.7-002",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-007",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    }
+   ]
+  },
+  {
+   "risk_id": "credo-risk-025",
+   "risk_name": "Corporate liability (IBM, 2024)",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.9034,
+   "grounding_confidence": "high",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "Any information that if exposed pub -licly might tarnish the reputation of the company, or information that would open the company to regulatory or legal action",
+     "document": "fs-isac.pdf",
+     "page": 9,
+     "section": "Monitoring"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "atlas-prompt-priming",
+   "risk_name": "Prompt priming",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.9007,
+   "grounding_confidence": "medium",
+   "accepted_by": "llm_judge",
+   "evidence": [
+    {
+     "text": "employees need to take care of the queries and inputs to these systems.",
+     "document": "fs-isac.pdf",
+     "page": 8,
+     "section": "Responsibility"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-01-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-01-07",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    }
+   ]
+  },
+  {
+   "risk_id": "atlas-nonconsensual-use",
+   "risk_name": "Nonconsensual use",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.8974,
+   "grounding_confidence": "medium",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "Other multimedia creation tools (e.g., 'deepfake' tools)",
+     "document": "fs-isac.pdf",
+     "page": 5,
+     "section": "Policy Guidance"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "GV-1.4-001",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "MP-2.3-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-5.1-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    }
+   ]
+  },
+  {
+   "risk_id": "ai-risk-taxonomy-unauthorized-processing---pii-(personal-identifiable-information)",
+   "risk_name": "Unauthorized processing - PII (Personal Identifiable Information)",
+   "taxonomy": "ai-risk-taxonomy",
+   "confidence": 0.8973,
+   "grounding_confidence": "high",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "Remove references to IP , NPI, PII",
+     "document": "fs-isac.pdf",
+     "page": 9,
+     "section": "Monitoring"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "ai-risk-taxonomy-unauthorized-processing---financial-records",
+   "risk_name": "Unauthorized processing - Financial records",
+   "taxonomy": "ai-risk-taxonomy",
+   "confidence": 0.8973,
+   "grounding_confidence": "high",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "manipulating financial services transactions for personal gain",
+     "document": "fs-isac.pdf",
+     "page": 9,
+     "section": "Monitoring"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "ai-risk-taxonomy-unauthorized-distribution---pii-(personal-identifiable-information)",
+   "risk_name": "Unauthorized distribution - PII (Personal Identifiable Information)",
+   "taxonomy": "ai-risk-taxonomy",
+   "confidence": 0.8936,
+   "grounding_confidence": "high",
+   "accepted_by": "llm_judge",
+   "evidence": [
+    {
+     "text": "Remove references to IP , NPI, PII",
+     "document": "fs-isac.pdf",
+     "page": 9,
+     "section": "Monitoring"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "mit-ai-risk-subdomain-5.1",
+   "risk_name": "Overreliance and unsafe use",
+   "taxonomy": "mit-ai-risk-repository",
+   "confidence": 0.8927,
+   "grounding_confidence": "medium",
+   "accepted_by": "llm_judge",
+   "evidence": [
+    {
+     "text": "Users should not rely on their accuracy.",
+     "document": "fs-isac.pdf",
+     "page": 9,
+     "section": "Monitoring"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "GV-1.3-004",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-1.4-002",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-3.2-003",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-4.2-001",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-002",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-010",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "MG-3.1-003",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-1.1-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-1.1-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-3.4-006",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-4.1-008",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.8-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-b007",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-c004",
+     "source": "aiuc1",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-c011",
+     "source": "aiuc1",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-e010",
+     "source": "aiuc1",
+     "category": "governance"
+    },
+    {
+     "action_id": "owasp-llm-act-01-05",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-06-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-06-06",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-09-03",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-09-07",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    },
+    {
+     "action_id": "owasp-llm-act-09-08",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-3.2-004",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-5.1-002",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.2-001",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "MG-2.2-008",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-3.2-008",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-4.1-003",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-3.4-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-3.4-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-3.4-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-3.4-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-3.4-005",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.10-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.5-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.7-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-3.3-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-3.3-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-4.2-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-c007",
+     "source": "aiuc1",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-c009",
+     "source": "aiuc1",
+     "category": "operational"
+    }
+   ]
+  },
+  {
+   "risk_id": "atlas-personal-information-in-prompt",
+   "risk_name": "Personal information in prompt",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.8922,
+   "grounding_confidence": "high",
+   "accepted_by": "llm_judge",
+   "evidence": [
+    {
+     "text": "employees need to take care of the queries and inputs to these systems.",
+     "document": "fs-isac.pdf",
+     "page": 7,
+     "section": "Responsibility"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-02-02",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-02-06",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    }
+   ]
+  },
+  {
+   "risk_id": "atlas-copyright-infringement",
+   "risk_name": "Copyright infringement",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.891,
+   "grounding_confidence": "medium",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "Ensure compliance with the terms of use of many generative AI systems (especially attribution and lack of copyright protection)",
+     "document": "fs-isac.pdf",
+     "page": 5,
+     "section": "Policy Guidance"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "GV-1.1-001",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-001",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-004",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-009",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "MG-3.1-004",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-4.1-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-4.1-006",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-4.1-010",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.10-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.6-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.8-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-a007",
+     "source": "aiuc1",
+     "category": "technical"
+    }
+   ]
+  },
+  {
+   "risk_id": "atlas-revealing-confidential-information",
+   "risk_name": "Revealing confidential information",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.8889,
+   "grounding_confidence": "high",
+   "accepted_by": "llm_judge",
+   "evidence": [
+    {
+     "text": "Currently, most external generative AI systems use queries for future training (although some systems allow opt-outs). The service may preserve the queries, which hackers could breach and release. Que\u2026",
+     "document": "fs-isac.pdf",
+     "page": 7,
+     "section": "Responsibility"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-02-03",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-02-09",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-07-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-08-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "GV-1.7-002",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-007",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "aiuc1-req-a004",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-a005",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-b009",
+     "source": "aiuc1",
+     "category": "technical"
+    }
+   ]
+  },
+  {
+   "risk_id": "credo-risk-024",
+   "risk_name": "Civil liability",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.8863,
+   "grounding_confidence": "medium",
+   "accepted_by": "llm_judge",
+   "evidence": [
+    {
+     "text": "That employee does not like their appraisal and files a complaint. Since an actual human did not write the appraisal, there is good reason to believe that the employee's grievances would be upheld.",
+     "document": "fs-isac.pdf",
+     "page": 11,
+     "section": "Representation as the Employee or Company"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "atlas-ip-information-in-prompt",
+   "risk_name": "IP information in prompt",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.8847,
+   "grounding_confidence": "high",
+   "accepted_by": "llm_judge",
+   "evidence": [
+    {
+     "text": "The impact, importance, or uniqueness of the company's intellectual property (IP) before sharing it.",
+     "document": "fs-isac.pdf",
+     "page": 5,
+     "section": "Confidentiality"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-02-02",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-a004",
+     "source": "aiuc1",
+     "category": "technical"
+    }
+   ]
+  },
+  {
+   "risk_id": "mit-ai-risk-subdomain-3.1",
+   "risk_name": "False or misleading information",
+   "taxonomy": "mit-ai-risk-repository",
+   "confidence": 0.8841,
+   "grounding_confidence": "high",
+   "accepted_by": "threshold",
+   "evidence": [
+    {
+     "text": "Distortion of statistics or other facts may lead to employees making public claims or key decisions based on erroneous information.",
+     "document": "fs-isac.pdf",
+     "page": 10,
+     "section": "Accuracy"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-04-08",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-09-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-09-02",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-09-03",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-09-04",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "MG-3.1-001",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-4.1-002",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-2.3-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-2.3-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.5-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.5-005",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-d001",
+     "source": "aiuc1",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-d002",
+     "source": "aiuc1",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-e003",
+     "source": "aiuc1",
+     "category": "governance"
+    }
+   ]
+  },
+  {
+   "risk_id": "mit-ai-risk-subdomain-4.3",
+   "risk_name": "Fraud, scams, and targeted manipulation",
+   "taxonomy": "mit-ai-risk-repository",
+   "confidence": 0.8827,
+   "grounding_confidence": "medium",
+   "accepted_by": "llm_judge",
+   "evidence": [
+    {
+     "text": "Employees can use these systems for nefarious purposes, such as proxy avoidance, unapproved network uses, or manipulating financial services transactions for personal gain",
+     "document": "fs-isac.pdf",
+     "page": 10,
+     "section": "Accuracy"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "GV-1.4-001",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "MP-2.3-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-5.1-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-a007",
+     "source": "aiuc1",
+     "category": "technical"
+    }
+   ]
+  },
+  {
+   "risk_id": "credo-risk-023",
+   "risk_name": "Regulatory compliance",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.8826,
+   "grounding_confidence": "high",
+   "accepted_by": "llm_judge",
+   "evidence": [
+    {
+     "text": "Ensure compliance with applicable regulations, laws, and acceptable fair use of others' copyright protections",
+     "document": "fs-isac.pdf",
+     "page": 11,
+     "section": "Representation as the Employee or Company"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "atlas-non-disclosure",
+   "risk_name": "Non-disclosure",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.8818,
+   "grounding_confidence": "high",
+   "accepted_by": "llm_judge",
+   "evidence": [
+    {
+     "text": "External generative AI systems often require users to give attribution to the system for any output, for example, in the Open AI's Terms of Use.",
+     "document": "fs-isac.pdf",
+     "page": 11,
+     "section": "Representation as the Employee or Company"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-09-05",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    },
+    {
+     "action_id": "owasp-llm-act-09-07",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-2.1-001",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-2.1-005",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-4.3-002",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-4.3-003",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-5.1-002",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.2-002",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "MG-4.3-002",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-5.1-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.3-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.8-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-e016",
+     "source": "aiuc1",
+     "category": "governance"
+    },
+    {
+     "action_id": "aiuc1-req-e017",
+     "source": "aiuc1",
+     "category": "governance"
+    }
+   ]
+  },
+  {
+   "risk_id": "mit-ai-risk-subdomain-2.2",
+   "risk_name": "AI system security vulnerabilities and attacks",
+   "taxonomy": "mit-ai-risk-repository",
+   "confidence": 0.8787,
+   "grounding_confidence": "medium",
+   "accepted_by": "llm_judge",
+   "evidence": [
+    {
+     "text": "The service may preserve the queries, which hackers could breach and release.",
+     "document": "fs-isac.pdf",
+     "page": 5,
+     "section": "Confidentiality"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-02-05",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-03-08",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-04-01",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-04-02",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-04-03",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-04-04",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-04-06",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-04-07",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-08-02",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "MG-3.1-002",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MS-2.7-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.7-007",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-b008",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-10-11",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "GV-3.2-005",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "MG-4.1-001",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-2.3-005",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-5.1-005",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.6-005",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.7-006",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.7-009",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-4.2-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-b001",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-b002",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-03-10",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-10-02",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-10-08",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-10-13",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "MS-2.10-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.7-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-b003",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-b004",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-e001",
+     "source": "aiuc1",
+     "category": "governance"
+    },
+    {
+     "action_id": "owasp-llm-act-05-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-05-02",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-05-03",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-05-04",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-05-05",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-09-06",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.6-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-c006",
+     "source": "aiuc1",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-f001",
+     "source": "aiuc1",
+     "category": "governance"
+    },
+    {
+     "action_id": "owasp-llm-act-01-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-01-03",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-01-07",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-07-02",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    },
+    {
+     "action_id": "owasp-llm-act-07-03",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-3.1-001",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MS-2.5-006",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.6-007",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.7-008",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-b005",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-01-02",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-01-04",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-01-05",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-01-06",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-5.1-006",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-02-08",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-07-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-b009",
+     "source": "aiuc1",
+     "category": "technical"
+    }
+   ]
+  },
+  {
+   "risk_id": "atlas-dangerous-use",
+   "risk_name": "Dangerous use",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.8745,
+   "grounding_confidence": "medium",
+   "accepted_by": "llm_judge",
+   "evidence": [
+    {
+     "text": "Employees can use these systems for nefarious purposes, such as proxy avoidance, unapproved network uses, or manipulating financial services transactions for personal gain",
+     "document": "fs-isac.pdf",
+     "page": 10,
+     "section": "Accuracy"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "GV-1.3-001",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-1.3-003",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-1.3-006",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-1.3-007",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-1.4-002",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-1.7-001",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-2.1-004",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "MG-1.3-001",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-2.2-005",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-2.4-001",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-2.4-002",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-2.4-004",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-3.1-004",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-4.1-002",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-1.1-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-4.1-005",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-1.1-005",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.12-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.6-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.6-006",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-c005",
+     "source": "aiuc1",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-c012",
+     "source": "aiuc1",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-e010",
+     "source": "aiuc1",
+     "category": "governance"
+    },
+    {
+     "action_id": "aiuc1-req-f001",
+     "source": "aiuc1",
+     "category": "governance"
+    },
+    {
+     "action_id": "aiuc1-req-f002",
+     "source": "aiuc1",
+     "category": "governance"
+    }
+   ]
+  },
+  {
+   "risk_id": "atlas-data-usage",
+   "risk_name": "Data usage restrictions",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.8726,
+   "grounding_confidence": "medium",
+   "accepted_by": "llm_judge",
+   "evidence": [
+    {
+     "text": "Ensure compliance with all applicable laws, rules, and regulations, including privacy requirements such as General Data Protection Regulation (GDPR)",
+     "document": "fs-isac.pdf",
+     "page": 5,
+     "section": "Policy Guidance"
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-02-07",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    },
+    {
+     "action_id": "aiuc1-req-a001",
+     "source": "aiuc1",
+     "category": "technical"
+    }
+   ]
+  },
+  {
+   "risk_id": "credo-risk-038",
+   "risk_name": "Compromised confidential information (Slattery et al., 2024; IBM, 2024;AI, 2023)",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.8698,
+   "grounding_confidence": "medium",
+   "accepted_by": "llm_judge",
+   "evidence": [
+    {
+     "text": "The service may preserve the queries, which hackers could breach and release.",
+     "document": "fs-isac.pdf",
+     "page": 5,
+     "section": "Policy Guidance"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "credo-risk-048",
+   "risk_name": "Upstream third-party dependencies (AI, 2023)",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.8633,
+   "grounding_confidence": "high",
+   "accepted_by": "llm_judge",
+   "evidence": [
+    {
+     "text": "The policy assumes as an overarching principle that data loss risks are present in the use of generative AI systems, like any other third-party system.",
+     "document": "fs-isac.pdf",
+     "page": 4,
+     "section": "Defining External Generative AI"
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "atlas-output-bias",
+   "risk_name": "Output bias",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.0,
+   "grounding_confidence": "high",
+   "accepted_by": "expansion",
+   "evidence": [
+    {
+     "text": "Poor, biased, and/or unethical busi - ness practices or decisions",
+     "document": "fs-isac.pdf",
+     "page": null,
+     "section": null
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "MG-2.2-004",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MS-1.1-006",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.11-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.11-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.2-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-3.3-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    }
+   ]
+  },
+  {
+   "risk_id": "mit-ai-risk-subdomain-1.1",
+   "risk_name": "Unfair discrimination and misrepresentation",
+   "taxonomy": "mit-ai-risk-repository",
+   "confidence": 0.0,
+   "grounding_confidence": "medium",
+   "accepted_by": "expansion",
+   "evidence": [
+    {
+     "text": "Poor, biased, and/or unethical busi - ness practices or decisions",
+     "document": "fs-isac.pdf",
+     "page": null,
+     "section": null
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "MG-2.2-004",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-3.2-003",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-2.3-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.11-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.2-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.6-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-1.1-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-1.1-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.11-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-3.3-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-c003",
+     "source": "aiuc1",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-c010",
+     "source": "aiuc1",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-1.1-006",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.11-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    }
+   ]
+  },
+  {
+   "risk_id": "credo-risk-034",
+   "risk_name": "Oversight and evaluation challenges",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.0,
+   "grounding_confidence": "medium",
+   "accepted_by": "expansion",
+   "evidence": [
+    {
+     "text": "While there are tools that try to detect if a generative AI system developed a specific output, they are not  (yet)  dependable  enough  to  find  whether  an  employee's  work  is  original  or  not.\u2026",
+     "document": "fs-isac.pdf",
+     "page": null,
+     "section": null
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "mit-ai-risk-subdomain-7.3",
+   "risk_name": "Lack of capability or robustness",
+   "taxonomy": "mit-ai-risk-repository",
+   "confidence": 0.0,
+   "grounding_confidence": "medium",
+   "accepted_by": "expansion",
+   "evidence": [
+    {
+     "text": "Since an actual human did not write the appraisal. That employee does not like their appraisal and files a complaint. Since an actual human did not write the appraisal, there is good reason to believe\u2026",
+     "document": "fs-isac.pdf",
+     "page": null,
+     "section": null
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-03-01",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-04-02",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "GV-6.1-005",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-007",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-009",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.2-007",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "aiuc1-req-a001",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-e006",
+     "source": "aiuc1",
+     "category": "governance"
+    },
+    {
+     "action_id": "owasp-llm-act-03-03",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-03-06",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-03-07",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-03-08",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-04-03",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-08-02",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-08-03",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-2.1-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-4.1-007",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-1.1-007",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.10-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.11-005",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-4.1-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-e005",
+     "source": "aiuc1",
+     "category": "governance"
+    },
+    {
+     "action_id": "aiuc1-req-e011",
+     "source": "aiuc1",
+     "category": "governance"
+    },
+    {
+     "action_id": "owasp-llm-act-02-07",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    },
+    {
+     "action_id": "MG-3.2-002",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MS-2.7-008",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-09-03",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-09-04",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "GV-1.3-002",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.2-006",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "MG-3.1-003",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-3.2-009",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-4.1-004",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MS-2.3-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.3-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-4.2-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-e013",
+     "source": "aiuc1",
+     "category": "governance"
+    },
+    {
+     "action_id": "MP-1.2-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-2.3-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.11-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    }
+   ]
+  },
+  {
+   "risk_id": "atlas-model-usage-rights",
+   "risk_name": "Model usage rights restrictions",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.0,
+   "grounding_confidence": "high",
+   "accepted_by": "expansion",
+   "evidence": [
+    {
+     "text": "External generative AI systems often require users to give attribution to the system for any output, for example, in the Open AI's Terms of Use.",
+     "document": "fs-isac.pdf",
+     "page": null,
+     "section": null
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-03-05",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-010",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    }
+   ]
+  },
+  {
+   "risk_id": "credo-risk-039",
+   "risk_name": "AI model and intellectual property theft",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.0,
+   "grounding_confidence": "medium",
+   "accepted_by": "expansion",
+   "evidence": [
+    {
+     "text": "Invalidate some uses of the output for proprietary or copyrighted work",
+     "document": "fs-isac.pdf",
+     "page": null,
+     "section": null
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "credo-risk-029",
+   "risk_name": "Mass surveillance and privacy attacks (Slattery et al., 2024)",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.0,
+   "grounding_confidence": "medium",
+   "accepted_by": "expansion",
+   "evidence": [
+    {
+     "text": "The company has the right to monitor the use of these systems per applicable laws and regulations. Management may occasionally verify that the use of these systems adheres to the directives outlined i\u2026",
+     "document": "fs-isac.pdf",
+     "page": null,
+     "section": null
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "credo-risk-027",
+   "risk_name": "Cyberattacks, weapon development, and mass harm (AI, 2023; IBM, 2024)",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.0,
+   "grounding_confidence": "medium",
+   "accepted_by": "expansion",
+   "evidence": [
+    {
+     "text": "Although generative AI has the power to increase cyber crime through convincing mimicking of  existing  communications, excellent translation capabilities,  deep fake images, audio, and video, ease of\u2026",
+     "document": "fs-isac.pdf",
+     "page": null,
+     "section": null
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "atlas-spreading-disinformation",
+   "risk_name": "Spreading disinformation",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.0,
+   "grounding_confidence": "high",
+   "accepted_by": "expansion",
+   "evidence": [
+    {
+     "text": "Although generative AI has the power to increase cyber crime through convincing mimicking of  existing  communications, excellent translation capabilities,  deep fake images, audio, and video, ease of\u2026",
+     "document": "fs-isac.pdf",
+     "page": null,
+     "section": null
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-09-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-09-05",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    },
+    {
+     "action_id": "MG-3.2-006",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-2.2-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-2.3-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-2.3-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-5.1-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-5.1-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-5.1-006",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-1.1-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.7-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    }
+   ]
+  },
+  {
+   "risk_id": "atlas-data-privacy-rights",
+   "risk_name": "Data privacy rights alignment",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.0,
+   "grounding_confidence": "medium",
+   "accepted_by": "expansion",
+   "evidence": [
+    {
+     "text": "Ensure compliance with all applicable laws, rules, and regulations, including privacy requirements such as General Data Protection Regulation (GDPR)",
+     "document": "fs-isac.pdf",
+     "page": null,
+     "section": null
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-02-07",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-1.1-001",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-1.7-002",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-009",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "MG-2.2-009",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-4.1-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-4.1-005",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-4.1-006",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-4.1-010",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.2-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.2-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-a001",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-a003",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-e005",
+     "source": "aiuc1",
+     "category": "governance"
+    },
+    {
+     "action_id": "aiuc1-req-e009",
+     "source": "aiuc1",
+     "category": "governance"
+    },
+    {
+     "action_id": "aiuc1-req-e012",
+     "source": "aiuc1",
+     "category": "governance"
+    }
+   ]
+  },
+  {
+   "risk_id": "mit-ai-risk-subdomain-6.3",
+   "risk_name": "Economic and cultural devaluation of human effort",
+   "taxonomy": "mit-ai-risk-repository",
+   "confidence": 0.0,
+   "grounding_confidence": "high",
+   "accepted_by": "expansion",
+   "evidence": [
+    {
+     "text": "Since an actual human did not write the appraisal, there is good reason to believe that the employee's grievances would be upheld.",
+     "document": "fs-isac.pdf",
+     "page": null,
+     "section": null
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "GV-1.1-001",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-001",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-004",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-009",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "MG-3.1-004",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-4.1-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-4.1-006",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-4.1-010",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.10-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.6-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.8-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-a007",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "aiuc1-req-a002",
+     "source": "aiuc1",
+     "category": "technical"
+    },
+    {
+     "action_id": "MS-3.3-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    }
+   ]
+  },
+  {
+   "risk_id": "atlas-over-or-under-reliance",
+   "risk_name": "Over- or under-reliance",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.0,
+   "grounding_confidence": "high",
+   "accepted_by": "expansion",
+   "evidence": [
+    {
+     "text": "Generative AI systems are far from perfect, especially with fact-based output. These systems may 'hallucinate' when their answers appear convincing but are completely wrong. Users should not rely on t\u2026",
+     "document": "fs-isac.pdf",
+     "page": null,
+     "section": null
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-01-05",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-06-01",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-06-06",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-09-03",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-09-07",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    },
+    {
+     "action_id": "owasp-llm-act-09-08",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-3.2-003",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-3.2-004",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-5.1-002",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.2-001",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "MG-2.2-008",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-3.2-008",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MG-4.1-003",
+     "source": "nist-ai-rmf",
+     "category": "technical"
+    },
+    {
+     "action_id": "MP-3.4-001",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-3.4-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-3.4-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-3.4-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MP-3.4-005",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.10-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.5-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-2.7-003",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-3.3-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-3.3-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "MS-4.2-004",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-c007",
+     "source": "aiuc1",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-c009",
+     "source": "aiuc1",
+     "category": "operational"
+    }
+   ]
+  },
+  {
+   "risk_id": "credo-risk-017",
+   "risk_name": "Inadequate AI literacy and communication",
+   "taxonomy": "credo-ucf",
+   "confidence": 0.0,
+   "grounding_confidence": "medium",
+   "accepted_by": "expansion",
+   "evidence": [
+    {
+     "text": "Others believe that employees may find workarounds to blocking these systems, and so it would be more produc -tive and indeed, more secure, to educate employees on how to safely use them.",
+     "document": "fs-isac.pdf",
+     "page": null,
+     "section": null
+    }
+   ],
+   "mitigations": []
+  },
+  {
+   "risk_id": "atlas-confidential-data-in-prompt",
+   "risk_name": "Confidential data in prompt",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.0,
+   "grounding_confidence": "high",
+   "accepted_by": "expansion",
+   "evidence": [
+    {
+     "text": "They can do harm too, so employees need to take care of the queries and inputs to these systems.",
+     "document": "fs-isac.pdf",
+     "page": null,
+     "section": null
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-02-02",
+     "source": "owasp-llm-2.0",
+     "category": "technical"
+    },
+    {
+     "action_id": "owasp-llm-act-02-06",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    },
+    {
+     "action_id": "aiuc1-req-a004",
+     "source": "aiuc1",
+     "category": "technical"
+    }
+   ]
+  },
+  {
+   "risk_id": "atlas-data-usage-rights",
+   "risk_name": "Data usage rights restrictions",
+   "taxonomy": "ibm-risk-atlas",
+   "confidence": 0.0,
+   "grounding_confidence": "high",
+   "accepted_by": "expansion",
+   "evidence": [
+    {
+     "text": "Ensure compliance with the terms of use of many generative AI systems (especially attribution and lack of copyright protection)",
+     "document": "fs-isac.pdf",
+     "page": null,
+     "section": null
+    }
+   ],
+   "mitigations": [
+    {
+     "action_id": "owasp-llm-act-03-01",
+     "source": "owasp-llm-2.0",
+     "category": "operational"
+    },
+    {
+     "action_id": "owasp-llm-act-03-05",
+     "source": "owasp-llm-2.0",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-001",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.1-004",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "GV-6.2-007",
+     "source": "nist-ai-rmf",
+     "category": "governance"
+    },
+    {
+     "action_id": "MP-4.1-002",
+     "source": "nist-ai-rmf",
+     "category": "operational"
+    },
+    {
+     "action_id": "aiuc1-req-a002",
+     "source": "aiuc1",
+     "category": "technical"
+    }
+   ]
+  }
+ ],
+ "source_documents": [
+  "fs-isac.pdf"
+ ],
+ "metadata": {
+  "model": "gemma-4-26b-a4b-it",
+  "timestamp": "2026-06-15T16:02:37.705776+00:00"
+ },
+ "eval": {
+  "policy": "fs-isac",
+  "total_expected": 55,
+  "total_extracted": 49,
+  "matched": 38,
+  "precision": 0.776,
+  "recall": 0.691,
+  "f1": 0.731,
+  "pass": false,
+  "per_taxonomy": {
+   "ai-risk-taxonomy": {
+    "expected": 6,
+    "extracted": 5,
+    "matched": 3,
+    "precision": 0.6,
+    "recall": 0.5,
+    "f1": 0.545
+   },
+   "credo-ucf": {
+    "expected": 19,
+    "extracted": 16,
+    "matched": 14,
+    "precision": 0.875,
+    "recall": 0.737,
+    "f1": 0.8
+   },
+   "ibm-risk-atlas": {
+    "expected": 22,
+    "extracted": 20,
+    "matched": 15,
+    "precision": 0.75,
+    "recall": 0.682,
+    "f1": 0.714
+   },
+   "mit-ai-risk-repository": {
+    "expected": 8,
+    "extracted": 8,
+    "matched": 6,
+    "precision": 0.75,
+    "recall": 0.75,
+    "f1": 0.75
+   }
+  }
+ }
+}

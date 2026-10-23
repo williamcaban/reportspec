@@ -1,0 +1,7 @@
+description: a radar with fewer than 3 axes fails instead of drawing a meaningless chart (density limit)
+format: html
+inputs:
+- ../inputs/mini.jsonl
+expect:
+  render: fail
+  render_error_contains: radar needs 3 to 12 axes

@@ -1,0 +1,5 @@
+description: YAML aliases are rejected
+expect:
+  validate: invalid
+  errors_contain:
+  - aliases are not allowed

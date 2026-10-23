@@ -1,0 +1,15 @@
+description: DOCX output carries charts as images, tables as tables, and untrusted text as inert text
+format: docx
+requires: [pandoc]
+inputs:
+- ../inputs/mini.jsonl
+expect:
+  render: ok
+  docx_media: 1
+  docx_contains:
+  - '&lt;script&gt;alert(1)&lt;/script&gt;'
+  - 'Figure 1. Rates'
+  - '<w:tbl>'
+  docx_excludes:
+  - '<script'
+  - '>49<'

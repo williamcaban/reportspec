@@ -1,0 +1,6 @@
+description: a required binding that does not resolve fails the render
+inputs:
+- ../inputs/mini-bundle.json
+expect:
+  render: fail
+  render_error_contains: did not resolve

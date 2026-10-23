@@ -1,0 +1,7 @@
+description: a JSONL file is a results source; null metrics stay N/A and header lines set subject and run
+inputs:
+- ../inputs/mini.jsonl
+expect:
+  render: ok
+  markdown_contains:
+  - acc=80.0% asr=none subject=m1 run=r1

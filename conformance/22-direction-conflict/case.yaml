@@ -1,0 +1,7 @@
+description: a binding direction that contradicts the bundle warns at render
+inputs:
+- ../inputs/mini-bundle.json
+expect:
+  render: ok
+  render_warnings_contain:
+  - declares higher_is_better but the bundle says ['lower_is_better']

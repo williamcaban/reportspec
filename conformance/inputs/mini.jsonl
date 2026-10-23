@@ -1,0 +1,8 @@
+{"subject":{"kind":"model","name":"m1"},"run":{"id":"r1"}}
+{"evaluation":"suite","label":"Suite","metric":"acc","value":0.8,"direction":"higher_is_better"}
+{"evaluation":"suite","metric":"asr","value":null,"direction":"lower_is_better"}
+{"evaluation":"suite","metric":"other","value":null}
+{"evaluation":"suite","set":"samples","group":"A","score":0.5}
+{"evaluation":"suite","set":"samples","group":"A","score":null}
+{"evaluation":"suite","set":"samples","group":"B","score":0.9}
+{"evaluation":"hostile","set":"rows","name":"<script>alert(1)</script>","note":"{{7*7}}"}

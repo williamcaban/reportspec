@@ -1,0 +1,7 @@
+description: two inputs with the same evaluation id fail
+inputs:
+- ../inputs/mini-bundle.json
+- ../inputs/dup-arc-bundle.json
+expect:
+  render: fail
+  render_error_contains: already in the bundle

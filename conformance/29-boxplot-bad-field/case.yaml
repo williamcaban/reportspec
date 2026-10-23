@@ -1,0 +1,5 @@
+description: a boxplot y field must be a field of its table binding
+expect:
+  validate: invalid
+  errors_contain:
+  - "y field 'nope' not in binding"

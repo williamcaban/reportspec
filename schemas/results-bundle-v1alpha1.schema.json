@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:reportspec:schema:v1alpha1:results-bundle",
+  "title": "ReportSpec ResultsBundle",
+  "description": "ReportSpec v1alpha1 (DRAFT). The host-neutral results model that ReportSpec bindings resolve against. Each host converts its native results (an EvalHub job, MLflow runs, MiDojo results.json, Policy Mapper risk-extraction.json, ...) into a bundle with an adapter; a spec never sees the native format. A bundle may combine several sources, for example an ASAGO pipeline's policy risks, red-team results and EvalHub benchmark results.",
+  "type": "object",
+  "required": ["bundle_version", "evaluations"],
+  "additionalProperties": false,
+  "properties": {
+    "bundle_version": { "const": "v1alpha1" },
+    "subject": {
+      "description": "What was evaluated. When sources disagree, the first source wins and the adapter records a warning.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["model", "agent", "application", "policy", "other"] },
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "uri": { "type": "string" }
+      }
+    },
+    "run": {
+      "description": "The run the report is about. With several sources, each source keeps its own run id in sources[].run_id.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "producer": { "$ref": "#/$defs/producer" },
+        "started_at": { "type": "string" },
+        "completed_at": { "type": "string" },
+        "context": {
+          "description": "Host context passed through to templates as run.context.* (EvalHub collection_id, ASAGO policy name, ...). Keys a host does not set print as the missing marker.",
+          "type": "object",
+          "additionalProperties": { "type": ["string", "number", "boolean", "null"] }
+        }
+      }
+    },
+    "verdict": {
+      "description": "Overall verdict, when a source computes one (EvalHub collection pass criteria). Exposed as the built-in bindings overall_score, overall_threshold, overall_pass. Renderers never compute it.",
+      "$ref": "#/$defs/verdict"
+    },
+    "evaluations": {
+      "type": "array",
+      "maxItems": 2048,
+      "items": { "$ref": "#/$defs/evaluation" }
+    },
+    "sources": {
+      "description": "Provenance: one entry per native input. Copied into the evidence manifest.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["adapter"],
+        "additionalProperties": false,
+        "properties": {
+          "adapter": { "type": "string", "description": "Adapter id, e.g. evalhub-job, mlflow, midojo, asago-risk-extraction." },
+          "adapter_version": { "type": "string" },
+          "uri": { "type": "string" },
+          "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+          "run_id": { "type": "string" },
+          "evaluations": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "warnings": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "producer": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": { "name": { "type": "string" }, "version": { "type": "string" } }
+    },
+    "direction": { "enum": ["higher_is_better", "lower_is_better"] },
+    "verdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "metric": { "type": "string", "description": "Name of the metric the verdict is based on." },
+        "score": { "type": ["number", "null"] },
+        "threshold": { "type": ["number", "null"] },
+        "pass": { "type": ["boolean", "null"] }
+      }
+    },
+    "metric": {
+      "type": "object",
+      "required": ["value"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "description": "null when the source reports the metric as undefined (for example precision with nothing extracted)." },
+        "type": { "enum": ["numeric", "categorical", "boolean", "array_ordered", "array_unordered", "time_series"], "default": "numeric" },
+        "direction": { "$ref": "#/$defs/direction", "description": "Filled by the adapter when the source knows it (EvalHub provider config primary_score.lower_is_better). A binding's own direction wins; a conflict is a render warning." },
+        "unit": { "type": "string" },
+        "aliases": { "type": "array", "items": { "type": "string" }, "description": "Other names the metric is known by, e.g. the MLflow-sanitized key acc_none for acc,none. References match the name first, then aliases." }
+      }
+    },
+    "evaluation": {
+      "type": "object",
+      "required": ["id", "metrics"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$", "description": "Unique within the bundle." },
+        "label": { "type": "string", "description": "Human name. Used as the series label for */metric references." },
+        "source": { "type": "string", "description": "Framework or provider that produced it: lm_evaluation_harness, garak, midojo, asago-policy-mapper." },
+        "metrics": {
+          "type": "object",
+          "propertyNames": { "pattern": "^[^/\\s]+$" },
+          "additionalProperties": { "$ref": "#/$defs/metric" }
+        },
+        "verdict": { "$ref": "#/$defs/verdict" },
+        "records": {
+          "description": "Named row sets for tables and matrices: MiDojo task pairs, Policy Mapper risks. Each row is a flat object of scalars.",
+          "type": "object",
+          "propertyNames": { "pattern": "^[A-Za-z0-9_]+$" },
+          "additionalProperties": {
+            "type": "array",
+            "maxItems": 10000,
+            "items": { "type": "object", "additionalProperties": { "type": ["string", "number", "boolean", "null"] } }
+          }
+        },
+        "attributes": {
+          "description": "Anything else the adapter keeps: Environment Card, EvalCard, OCI references. Reached with {evaluation, field: attributes.x.y}.",
+          "type": "object"
+        }
+      }
+    }
+  }
+}

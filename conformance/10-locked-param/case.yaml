@@ -1,0 +1,8 @@
+description: overriding a non-overridable param fails
+inputs:
+- ../inputs/mini-bundle.json
+params:
+  floor: 0.1
+expect:
+  render: fail
+  render_error_contains: not overridable

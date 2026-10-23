@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:reportspec:schema:resolved-viz:v1alpha1",
+  "title": "ReportSpec resolved viz payload v1alpha1 (DRAFT)",
+  "description": "What a chart renderer receives for one reportspec-viz block: bindings already resolved, verdict inputs (threshold, direction) already evaluated, text already formatted. A renderer never sees a binding, a template or a host, so EvalHub and ASAGO can share one. The evidence manifest records a digest of this payload per figure.",
+  "type": "object",
+  "required": ["id", "type", "title", "options"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,62}$" },
+    "type": { "enum": ["bar", "line", "heatmap", "radar", "radial", "boxplot"] },
+    "title": { "type": "string", "maxLength": 200 },
+    "caption": { "type": ["string", "null"], "maxLength": 1000 },
+    "alt": { "type": ["string", "null"], "maxLength": 1000, "description": "Author-supplied accessible text. Generated from the data when null (VQA-9)." },
+    "direction": { "enum": ["higher_is_better", "lower_is_better", null] },
+    "threshold": { "type": ["number", "null"] },
+    "range": { "type": ["array", "null"], "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+    "display": { "type": ["string", "null"], "description": "number, percent, integer, boolean. Only used for axis and threshold text; point text is preformatted." },
+    "precision": { "type": ["integer", "null"], "minimum": 0, "maximum": 6 },
+    "options": {
+      "type": "object",
+      "description": "Type-specific choices from the block, passed through: orientation, fill, palette, midpoint, show_values, x_label, y_label.",
+      "properties": {
+        "orientation": { "enum": ["vertical", "horizontal"] },
+        "fill": { "type": "boolean" },
+        "palette": { "type": "string" },
+        "midpoint": { "type": ["number", "null"] },
+        "show_values": { "type": "boolean" },
+        "x_label": { "type": "string" },
+        "y_label": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "points": {
+      "type": "array",
+      "maxItems": 500,
+      "description": "bar, line, radar, radial. Order is meaningful. value null means N/A and is never drawn as zero.",
+      "items": {
+        "type": "object",
+        "required": ["label", "value", "text"],
+        "additionalProperties": false,
+        "properties": {
+          "label": { "type": "string" },
+          "value": { "type": ["number", "null"] },
+          "text": { "type": "string", "description": "Formatted value, or N/A." }
+        }
+      }
+    },
+    "matrix": {
+      "type": "object",
+      "description": "heatmap",
+      "required": ["columns", "rows"],
+      "additionalProperties": false,
+      "properties": {
+        "columns": { "type": "array", "items": { "type": "string" }, "maxItems": 200 },
+        "rows": {
+          "type": "array",
+          "maxItems": 500,
+          "items": {
+            "type": "object",
+            "required": ["label", "cells"],
+            "additionalProperties": false,
+            "properties": {
+              "label": { "type": "string" },
+              "cells": {
+                "type": "array",
+                "description": "One per column, in column order.",
+                "items": {
+                  "type": "object",
+                  "required": ["value", "text"],
+                  "additionalProperties": false,
+                  "properties": { "value": { "type": ["number", "null"] }, "text": { "type": "string" } }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "samples": {
+      "type": "array",
+      "maxItems": 10000,
+      "description": "boxplot. One entry per sample; y null is an N/A sample, excluded from the box and counted.",
+      "items": {
+        "type": "object",
+        "required": ["x", "y"],
+        "additionalProperties": false,
+        "properties": { "x": { "type": "string" }, "y": { "type": ["number", "null"] } }
+      }
+    }
+  },
+  "allOf": [
+    { "if": { "properties": { "type": { "enum": ["bar", "line", "radar", "radial"] } } }, "then": { "required": ["points"] } },
+    { "if": { "properties": { "type": { "const": "heatmap" } } }, "then": { "required": ["matrix"] } },
+    { "if": { "properties": { "type": { "const": "boxplot" } } }, "then": { "required": ["samples"] } }
+  ]
+}

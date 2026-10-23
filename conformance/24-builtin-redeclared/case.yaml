@@ -1,0 +1,5 @@
+description: a built-in cannot be given a source
+expect:
+  validate: invalid
+  errors_contain:
+  - is a built-in

@@ -1,0 +1,5 @@
+description: function calls are rejected
+expect:
+  validate: invalid
+  errors_contain:
+  - '''Call'' is not allowed'

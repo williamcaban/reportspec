@@ -1,0 +1,8 @@
+description: all-N/A data renders a labelled placeholder, never a blank or zero-filled chart
+format: html
+inputs:
+- ../inputs/mini.jsonl
+expect:
+  render: ok
+  html_contains:
+  - No data available

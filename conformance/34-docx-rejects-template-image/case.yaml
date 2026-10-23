@@ -1,0 +1,8 @@
+description: a template image fails DOCX output, because pandoc would fetch its URL
+format: docx
+requires: [pandoc]
+inputs:
+- ../inputs/mini.jsonl
+expect:
+  render: fail
+  render_error_contains: images in a template are not supported in DOCX output

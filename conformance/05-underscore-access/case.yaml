@@ -1,0 +1,5 @@
+description: underscore attribute access is rejected
+expect:
+  validate: invalid
+  errors_contain:
+  - underscore attribute

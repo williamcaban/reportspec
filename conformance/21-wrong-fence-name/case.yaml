@@ -1,0 +1,5 @@
+description: a *-viz fence that is not reportspec-viz warns
+expect:
+  validate: valid
+  warnings_contain:
+  - did you mean 'reportspec-viz'

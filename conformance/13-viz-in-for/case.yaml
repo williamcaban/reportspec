@@ -1,0 +1,5 @@
+description: a viz block inside a for loop is rejected
+expect:
+  validate: invalid
+  errors_contain:
+  - inside a {% for %} loop

@@ -1,0 +1,7 @@
+description: '''is available'' guard short-circuits a missing value'
+inputs:
+- ../inputs/mini-bundle.json
+expect:
+  render: ok
+  markdown_contains:
+  - skipped

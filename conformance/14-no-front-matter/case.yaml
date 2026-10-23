@@ -1,0 +1,5 @@
+description: a file without front matter is rejected
+expect:
+  validate: invalid
+  errors_contain:
+  - must start with a '---'

@@ -1,0 +1,13 @@
+{
+ "bundle_version": "v1alpha1",
+ "evaluations": [
+  {
+   "id": "arc",
+   "metrics": {
+    "acc": {
+     "value": 0.1
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,5 @@
+description: a radar needs a series binding
+expect:
+  validate: invalid
+  errors_contain:
+  - radar needs a series binding

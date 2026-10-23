@@ -1,0 +1,5 @@
+description: an unknown top-level scalar key is rejected (typo guard)
+expect:
+  validate: invalid
+  errors_contain:
+  - subtitel

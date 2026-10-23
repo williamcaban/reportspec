@@ -1,0 +1,10 @@
+description: '*/acc is a series labeled by evaluation label'
+inputs:
+- ../inputs/mini-bundle.json
+expect:
+  render: ok
+  markdown_contains:
+  - '| ARC | 0.7 |'
+  - '| HellaSwag | 0.8 |'
+  markdown_excludes:
+  - '| MMLU |'

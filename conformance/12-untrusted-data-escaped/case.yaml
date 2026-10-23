@@ -1,0 +1,13 @@
+description: HTML, image beacons and template text in results stay inert
+inputs:
+- ../inputs/mini-bundle.json
+expect:
+  render: ok
+  markdown_contains:
+  - \<script\>
+  - \!\[x\]
+  - '{{7\*7}}'
+  markdown_excludes:
+  - <script>
+  - '49'
+  - '![x]'

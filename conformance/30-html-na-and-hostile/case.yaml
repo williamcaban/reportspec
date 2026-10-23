@@ -1,0 +1,14 @@
+description: HTML output marks N/A visibly and keeps hostile labels inert, in the SVG and in the alt text
+format: html
+inputs:
+- ../inputs/mini.jsonl
+expect:
+  render: ok
+  html_contains:
+  - '>N/A<'
+  - '&lt;script&gt;alert(1)&lt;/script&gt;'
+  - 'role="img"'
+  html_excludes:
+  - '<script'
+  - '<foreignObject'
+  - 'onerror='

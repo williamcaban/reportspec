@@ -1,0 +1,6 @@
+description: a radar whose axes have mixed polarity in the bundle fails
+inputs:
+- ../inputs/mini-bundle.json
+expect:
+  render: fail
+  render_error_contains: radar axes mix

@@ -1,0 +1,13 @@
+description: ASAGO brief renders from Policy Mapper + MiDojo + EvalHub inputs
+spec: ../../examples/agent-redteam.report.md
+inputs:
+- ../../examples/inputs/asago-risk-extraction.json
+- ../../examples/inputs/midojo-results.json
+- ../../examples/inputs/evalhub-job.json
+expect:
+  render: ok
+  markdown_contains:
+  - '**49 risks**'
+  - '| Attack success rate | 33.3% | 10.0% | FAIL |'
+  - 9 pairs are N/A
+  - '`fs-isac.pdf`'

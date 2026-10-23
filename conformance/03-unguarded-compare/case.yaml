@@ -1,0 +1,9 @@
+description: comparing an optional binding warns; fails at render when missing
+inputs:
+- ../inputs/mini-bundle.json
+expect:
+  validate: valid
+  warnings_contain:
+  - without an 'is available' guard
+  render: fail
+  render_error_contains: is missing

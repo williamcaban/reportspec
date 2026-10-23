@@ -1,0 +1,6 @@
+description: a JSONL metric line without a value fails with its line number
+inputs:
+- ../inputs/bad.jsonl
+expect:
+  render: fail
+  render_error_contains: "line 1: metric 'm' has no 'value'"

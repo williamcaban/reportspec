@@ -1,0 +1,6 @@
+description: an N/A record value cannot be truth-tested
+inputs:
+- ../inputs/mini-bundle.json
+expect:
+  render: fail
+  render_error_contains: is missing

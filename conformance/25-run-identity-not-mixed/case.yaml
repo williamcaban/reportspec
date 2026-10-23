@@ -1,0 +1,8 @@
+description: run identity comes whole from the first source with an id; context merges
+inputs:
+- ../../examples/inputs/midojo-results.json
+- ../../examples/inputs/evalhub-job.json
+expect:
+  render: ok
+  markdown_contains:
+  - run=midojo-run-4b7e90 started=*data unavailable* suite=weather collection=safety-and-fairness

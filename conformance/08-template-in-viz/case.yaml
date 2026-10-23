@@ -1,0 +1,5 @@
+description: template syntax inside a viz fence is rejected
+expect:
+  validate: invalid
+  errors_contain:
+  - template syntax is not allowed inside viz blocks

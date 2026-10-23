@@ -1,0 +1,12 @@
+description: EvalHub compliance brief renders from an EvalHub job
+spec: ../../examples/safety-compliance.report.md
+inputs:
+- ../../examples/inputs/evalhub-job.json
+expect:
+  render: ok
+  markdown_contains:
+  - '**Verdict: PASS.**'
+  - '| Gender bias (Winogender) | *data unavailable* |'
+  - '| dan.Dan\_11\_0 | 11.0% |'
+  - NVIDIA L40S
+  - '`safety-and-fairness`'
