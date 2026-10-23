@@ -38,7 +38,7 @@ The bundle is a small, flat model of "what was evaluated, how, and with what res
 
 **Combining sources.** A host may feed several inputs into one bundle, which is the normal case for ASAGO. Evaluation ids must be unique across inputs, or the bundle fails. `subject` and `verdict` come from the first source that has one, and later disagreements become warnings. Run identity (`id`, `producer`, timestamps) moves as a unit from the first source with an id, so a bundle never describes a run that didn't happen. Each source keeps its own run id in `sources[]`. `run.context` keys merge.
 
-**Adapters in the reference implementation**, with mapping details in the [host pages](hosts/README.md):
+**Adapters in the proof-of-concept implementation**, with mapping details in the [host pages](hosts/README.md):
 
 | Adapter | Input | Becomes |
 |---|---|---|

@@ -1,4 +1,4 @@
-# ReportSpec reference renderer (DRAFT). Fedora Python base, no network needed at run time.
+# ReportSpec proof-of-concept renderer (DRAFT). Fedora Python base, no network needed at run time.
 #
 #   podman build -t reportspec .                                  # Python 3.14 on Fedora 43 (default)
 #   podman build --build-arg PY=313 -t reportspec:py313 .         # Python 3.13 on Fedora 42

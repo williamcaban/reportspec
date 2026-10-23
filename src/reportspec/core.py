@@ -1,4 +1,4 @@
-"""ReportSpec v1alpha1 (DRAFT) reference implementation: validator, bundler, renderer and conformance runner.
+"""ReportSpec v1alpha1 (DRAFT) proof-of-concept implementation: validator, bundler, renderer and conformance runner.
 
 Host-neutral: a spec binds to a ResultsBundle, and adapters turn each host's native
 results (EvalHub job, MiDojo results.json, Policy Mapper risk-extraction.json, JSONL) into one.

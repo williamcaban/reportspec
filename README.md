@@ -4,7 +4,7 @@ Write a report as one Markdown file, hand it results as JSON or JSONL, and get a
 
 ReportSpec is built for AI evaluation evidence: [EvalHub](docs/hosts/evalhub.md) benchmark runs, [ASAGO](docs/hosts/asago.md) red-team and policy-risk results, or any tool that can print JSONL. The same template renders the same report on every host.
 
-**Status:** v1alpha1, a draft. The reference implementation is Python 3.13+. Field names and the API may change.
+> **This is a proof of concept (POC).** It is not the final design and it has not been adopted by EvalHub, ASAGO or any other project; neither project has committed to it. It exists to test whether one Markdown template and one portable results format can serve more than one evaluation product, and to give engineers something concrete to try, criticize and replace. The spec is v1alpha1, so field names, file formats and the command line may change without notice, and there is no release yet. Do not build on it as a stable interface.
 
 - **Portable.** Templates bind to a host-neutral results model, never to a tool's native format.
 - **Safe with untrusted data.** Results can carry hostile text, so every value is escaped and the template language is a small allowlisted subset.

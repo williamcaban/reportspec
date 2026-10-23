@@ -1,6 +1,6 @@
 # ReportSpec conformance cases
 
-Every implementation, whatever the host or language, must produce these outcomes. The reference implementation is Python 3.13+. Run the reference implementation with:
+Every implementation, whatever the host or language, must produce these outcomes. The proof-of-concept implementation is Python 3.13+. Run the proof-of-concept implementation with:
 
 ```bash
 reportspec conformance .   # from a clone: uv run reportspec conformance .
@@ -30,7 +30,7 @@ expect:
   docx_media: N                      # number of embedded images
 ```
 
-Error and warning matching is by substring of the reference implementation's messages. Another implementation may word its messages differently: it must agree on valid or invalid, ok or fail, and on the rendered Markdown, and should map its messages to these cases in its own test suite.
+Error and warning matching is by substring of the proof-of-concept implementation's messages. Another implementation may word its messages differently: it must agree on valid or invalid, ok or fail, and on the rendered Markdown, and should map its messages to these cases in its own test suite.
 
 `inputs/mini.jsonl` is the JSONL equivalent (null metrics, a null sample, a header line), and `inputs/bad.jsonl` is a malformed line.
 

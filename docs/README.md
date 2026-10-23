@@ -1,6 +1,6 @@
 # ReportSpec documentation
 
-ReportSpec v1alpha1 (draft). Start with the [README](../README.md) for install and a first report.
+ReportSpec v1alpha1 is a proof of concept (POC), not the final or an adopted design. Start with the [README](../README.md) for install and a first report.
 
 | Page | Read it to |
 |---|---|
@@ -25,6 +25,6 @@ ReportSpec v1alpha1 (draft). Start with the [README](../README.md) for install a
 | [`resolved-viz-v1alpha1.schema.json`](../src/reportspec/schemas/resolved-viz-v1alpha1.schema.json) | The payload a chart renderer receives: bindings resolved, text formatted. The seam between the spec and any drawing library |
 | [`examples/`](../examples/) | Report templates and [native inputs](../examples/inputs/) (provenance in each file's `_comment`); [rendered samples](../examples/output/) |
 | [`conformance/`](../conformance/README.md) | 34 cases every implementation must pass |
-| [`src/reportspec/`](../src/reportspec/) | The package: `core.py` (validator, bundler, renderer, conformance runner), `cli.py`, `charts.py`, `htmlout.py`, `docxout.py`, `fontset.py`. Reference implementation, not product code |
+| [`src/reportspec/`](../src/reportspec/) | The package: `core.py` (validator, bundler, renderer, conformance runner), `cli.py`, `charts.py`, `htmlout.py`, `docxout.py`, `fontset.py`. Proof-of-concept implementation, not product code |
 | [fonts](../src/reportspec/fonts/README.md), [icons](../src/reportspec/icons/README.md) | Vendored Red Hat Text/Mono (OFL) and Font Awesome Free status icons (CC BY 4.0), with provenance and font policy |
 | [`Containerfile`](../Containerfile), `uv.lock` | Fedora Python image with every dependency pinned and hash-checked |

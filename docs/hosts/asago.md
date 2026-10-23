@@ -1,6 +1,6 @@
 # ReportSpec host profile: ASAGO
 
-**Status:** DRAFT, a proposal for the ASAGO community · **Docs:** [index](../README.md) · **Implemented:** the `midojo` and `asago-risk-extraction` adapters. **Proposals, not implemented:** the API and ASAGO-ADR-0002 · **Related:** [ASAGO-ADR-0001](https://github.com/asago-ai/architecture-decision-records/blob/main/architecture-decision-records/ASAGO-ADR-0001-asago-server.md) (server; leaves report generation to a separate ADR)
+**Status:** DRAFT, a proposal from a proof of concept for the ASAGO community. ASAGO has not adopted it · **Docs:** [index](../README.md) · **Implemented:** the `midojo` and `asago-risk-extraction` adapters. **Proposals, not implemented:** the API and ASAGO-ADR-0002 · **Related:** [ASAGO-ADR-0001](https://github.com/asago-ai/architecture-decision-records/blob/main/architecture-decision-records/ASAGO-ADR-0001-asago-server.md) (server; leaves report generation to a separate ADR)
 
 This profile covers how ASAGO would host ReportSpec: its adapters, an API that fits ADR-0001's stateless design, and its host namespace. Repos were checked on 2026-10-20: `midojo` 337470f, `asago-examples` b79020d, `architecture-decision-records` main.
 

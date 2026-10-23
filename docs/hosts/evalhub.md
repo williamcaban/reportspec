@@ -1,6 +1,6 @@
 # ReportSpec host profile: EvalHub
 
-**Status:** DRAFT · **Docs:** [index](../README.md) · **Implemented:** the `evalhub-job` adapter. **Proposals, not implemented:** the `mlflow` adapter and the API, CLI and CRD
+**Status:** DRAFT, a proposal from a proof of concept. EvalHub has not adopted it · **Docs:** [index](../README.md) · **Implemented:** the `evalhub-job` adapter. **Proposals, not implemented:** the `mlflow` adapter and the API, CLI and CRD
 
 This profile covers what EvalHub adds around the portable core: its host namespace, its adapters, and its API. A spec that uses only the core renders the same on EvalHub and on ASAGO.
 
@@ -62,7 +62,7 @@ Recommendation: render compliance reports from the EvalHub job (the system of re
 
 ## API, CLI and CRD (proposal)
 
-None of this exists in the reference implementation. It is the surface EvalHub engineering would build; the standalone `reportspec` command already covers rendering from a job JSON file.
+None of this exists in the proof-of-concept implementation. It is the surface EvalHub engineering would build; the standalone `reportspec` command already covers rendering from a job JSON file.
 
 The `.md` file is the canonical, digest-able artifact; wrappers carry it unchanged.
 
