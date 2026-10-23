@@ -25,6 +25,8 @@ RUN dnf -y install --setopt=install_weak_deps=False \
 
 WORKDIR /opt/app-root/reportspec
 COPY --chown=1001:0 . .
+# WORKDIR creates the directory as root under Docker (Podman happens to hand it to the build user), so the later chmod needs this.
+RUN chown 1001:0 /opt/app-root/reportspec
 
 # Install the locked dependencies (hash-checked, uv.lock) and the package itself into a virtualenv.
 # uv is a build-time tool only: the entrypoint is the installed command, so the container runs offline with a read-only root.
