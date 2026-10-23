@@ -21,11 +21,15 @@ uvx --from git+https://github.com/williamcaban/reportspec reportspec --version  
 pip install git+https://github.com/williamcaban/reportspec          # or plain pip, ideally in a virtualenv
 ```
 
-PDF output needs Pango (`dnf install pango`, `brew install pango`) and DOCX output needs `pandoc`. A container image with both is described in [docs/container.md](docs/container.md).
+PDF output needs Pango (`dnf install pango`, `brew install pango`) and DOCX output needs `pandoc`. If you would rather not install anything, use the [container](#run-it-in-a-container).
 
-## Quick start
+## Run it
 
-Clone the repository for the examples, then render a showcase report from one Markdown file and one JSONL file:
+ReportSpec runs in two ways. Both give the same output.
+
+### Command line
+
+Clone the repository for the examples, then render a report from one Markdown file and one JSONL file:
 
 ```bash
 git clone https://github.com/williamcaban/reportspec && cd reportspec
@@ -33,15 +37,50 @@ reportspec render examples/model-release.report.md \
   --input examples/inputs/model-release.jsonl --format pdf -o out/model-release.pdf
 ```
 
-Use `--format html` or `--format docx` for the other outputs. Each run also writes `<name>.manifest.json`, the evidence record. Rendered samples are checked in under [`examples/output/`](examples/output/) if you want to look first.
-
-Other commands:
+Use `--format html` or `--format docx` for the other outputs. Each run also writes `<name>.manifest.json`, the evidence record. Other commands:
 
 ```bash
-reportspec validate examples/safety-compliance.report.md   # check a template without rendering
+reportspec validate examples/safety-compliance.report.md        # check a template without rendering
 reportspec bundle --input examples/inputs/midojo-results.json   # show the normalized results
-reportspec conformance conformance/                        # run the 34 conformance cases
+reportspec conformance conformance/                             # run the 34 conformance cases
 ```
+
+All options are in the [command line reference](docs/cli.md). From a clone you can also use `uv run reportspec …`.
+
+### Run it in a container
+
+The image carries everything (Pango, pandoc, fonts, locked dependencies), runs offline and read-only, and needs no Python on your machine. There is no published image yet, so build it once from a clone:
+
+```bash
+podman build -t reportspec .                       # Fedora 43, Python 3.14. Add --build-arg PY=313 for Fedora 42, Python 3.13
+```
+
+Docker works the same way: `docker build -f Containerfile -t reportspec .`. Then run any command from above after the image name. The examples are inside the image:
+
+```bash
+podman run --rm reportspec conformance conformance
+```
+
+To render your own files, mount a folder and write the output there:
+
+```bash
+mkdir -p work && cp my.report.md results.jsonl work/
+podman run --rm --network none --read-only --tmpfs /tmp -v "$PWD/work:/work:Z" reportspec \
+  render /work/my.report.md --input /work/results.jsonl --format pdf -o /work/report.pdf
+```
+
+[Running in a container](docs/container.md) has the details: Docker and Linux file ownership, the build arguments, OpenShift, and what is inside the image.
+
+## Example output
+
+Rendered samples checked into the repository, so you can see the result without installing anything:
+
+| Report | Template and results | What it shows |
+|---|---|---|
+| [Model release readiness (PDF)](examples/output/model-release.pdf), [HTML](examples/output/model-release.html), [DOCX](examples/output/model-release.docx) | [template](examples/model-release.report.md), [JSONL](examples/inputs/model-release.jsonl) | Every chart type, from one JSONL file. Synthetic data |
+| [Safety compliance brief (PDF)](examples/output/safety-compliance.pdf) | [template](examples/safety-compliance.report.md), [EvalHub job](examples/inputs/evalhub-job.json) | One EvalHub collection run for a compliance reader |
+| [Agent red-team report (PDF)](examples/output/agent-redteam.pdf), [DOCX](examples/output/agent-redteam.docx) | [template](examples/agent-redteam.report.md), [three native inputs](examples/inputs/) | Policy Mapper risks, MiDojo red team and EvalHub results in one report |
+| [Quickstart (PDF)](examples/output/quickstart.pdf) | [template](examples/quickstart.report.md), [JSONL](examples/inputs/quickstart.jsonl) | The smallest useful report, used in the [tutorial](docs/tutorial.md) |
 
 ## What a template looks like
 
@@ -70,9 +109,26 @@ Charts, tables and cards are drawn only from resolved data. Pass/fail marks come
 
 ## Documentation
 
-New here? Follow the [tutorial](docs/tutorial.md). Then see [docs/](docs/README.md): [parameters](docs/parameters.md), [JSONL results](docs/jsonl.md), [concepts](docs/concepts.md), [writing a template](docs/authoring.md), [results and bindings](docs/results-and-bindings.md), [command line](docs/cli.md), [output and conformance](docs/output-and-conformance.md), [container](docs/container.md), [hosts](docs/hosts/README.md), [status and open questions](docs/status.md). Chart quality requirements are in [VISUAL-QA.md](VISUAL-QA.md).
+**Get started**
+- [Tutorial: your first report](docs/tutorial.md): a JSONL file and a template to a rendered report, step by step
+- [Writing JSONL results](docs/jsonl.md): how to produce a results file for your template
+- [Parameters](docs/parameters.md): declare, lock, use and override report settings
 
-From a clone, use `uv run reportspec …` in place of `reportspec …`, and `uv run pytest` to run the tests.
+**Reference**
+- [Writing a report template](docs/authoring.md): front matter, template language, missing data, charts
+- [Results, adapters and bindings](docs/results-and-bindings.md): how a template refers to results
+- [Command line](docs/cli.md): commands, options, exit codes
+- [Running in a container](docs/container.md): build and run the image
+- [Output and conformance](docs/output-and-conformance.md): the evidence manifest and the 34 conformance cases
+
+**Background**
+- [Concepts and design](docs/concepts.md): why it exists and how the layers fit
+- [Hosts](docs/hosts/README.md): using it from [EvalHub](docs/hosts/evalhub.md) and [ASAGO](docs/hosts/asago.md)
+
+**Project**
+- [Roadmap](docs/roadmap.md): what is planned, what is verified, open questions and quality requirements
+
+From a clone, `uv run pytest` runs the tests.
 
 ## License
 
