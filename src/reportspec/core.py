@@ -284,6 +284,22 @@ def param_type(p: Any) -> str:
     return "boolean" if isinstance(v, bool) else "number" if isinstance(v, int | float) else "string"
 
 
+def parse_param_override(name: str, raw: str, type_: str) -> Any:
+    """Turn the text of --param NAME=VALUE into the declared type; a bad value is a usage error, not a traceback."""
+    if type_ == "number":
+        try:
+            return float(raw)
+        except ValueError:
+            raise SpecError(f"--param {name}: {raw!r} is not a number") from None
+    if type_ == "boolean":
+        if raw.lower() in ("1", "true", "yes"):
+            return True
+        if raw.lower() in ("0", "false", "no"):
+            return False
+        raise SpecError(f"--param {name}: {raw!r} is not a boolean (true/false, yes/no, 1/0)")
+    return raw
+
+
 def validate_text(text: str) -> tuple[Report, dict[str, Any], dict[str, Any], str, list[dict[str, Any]]]:
     rep = Report()
     try:
@@ -1188,7 +1204,10 @@ def render_text(text: str, spec_name: str, inputs: list[str], out_format: str, o
         if isinstance(raw_params[k], dict) and raw_params[k].get("overridable") is False:
             raise SpecError(f"--param {k}: parameter is not overridable")
         t = param_type(raw_params[k])
-        params[k] = float(v) if t == "number" else v.lower() in ("1", "true", "yes") if t == "boolean" else v
+        params[k] = parse_param_override(k, v, t)
+        choices = raw_params[k].get("choices") if isinstance(raw_params[k], dict) else None
+        if choices and params[k] not in choices:
+            raise SpecError(f"--param {k}: {v!r} is not one of {choices}")
 
     bundle = build_bundle(inputs)
     for w in bundle["warnings"]:
