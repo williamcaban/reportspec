@@ -1,0 +1,7 @@
+description: "lower_is_better can only name an axis the chart draws"
+inputs:
+- ../inputs/network.jsonl
+expect:
+  validate: invalid
+  errors_contain:
+  - "lower_is_better names 'latency', which is not in axes"

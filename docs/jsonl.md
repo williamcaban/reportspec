@@ -62,6 +62,8 @@ Each line adds one row to a named table. Every key other than `evaluation`, `set
 {"evaluation": "judge", "set": "scores", "model": "other-13b", "score": 0.81}
 ```
 
+Two of those keys are easy to trip over: `label` and `source` are always read as the group's display name and producer, never as a column. A table of nodes or links needs other names (`name`, `from`, `to`), which a binding maps back with `fields: { label: name, source: from }`. See [networks and parallel coordinates](authoring.md#networks-and-parallel-coordinates).
+
 Keep rows flat: strings, numbers, booleans and `null`, no nested objects. Use `set` lines for anything tabular (failed probes, per-task results) and for **box plots**, which want one row per sample so the chart can compute the quartiles. The renderer does not average samples into scores; if you want a score, emit it as a metric yourself.
 
 ## Verdicts

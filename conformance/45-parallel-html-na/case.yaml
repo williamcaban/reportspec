@@ -1,0 +1,10 @@
+description: "HTML says how many values are N/A, names them under their axis, and breaks the line there instead of drawing it through zero"
+format: html
+inputs:
+- ../inputs/network.jsonl
+expect:
+  render: ok
+  html_contains:
+  - 'N/A: 1 value not available; the line breaks there and is not drawn through zero.'
+  - '>N/A: B<'
+  - 'Axes marked lower is better are flipped'

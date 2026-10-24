@@ -1,0 +1,7 @@
+description: "a bundle needs a group on every node: the nodes binding must have a field named group"
+inputs:
+- ../inputs/network.jsonl
+expect:
+  validate: invalid
+  errors_contain:
+  - "needs a field named 'group'"

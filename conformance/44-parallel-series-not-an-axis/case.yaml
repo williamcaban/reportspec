@@ -1,0 +1,7 @@
+description: "the field that names each line cannot also be one of its axes"
+inputs:
+- ../inputs/network.jsonl
+expect:
+  validate: invalid
+  errors_contain:
+  - "series field 'source' cannot also be an axis"

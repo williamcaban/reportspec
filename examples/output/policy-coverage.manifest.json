@@ -1,0 +1,429 @@
+{
+  "manifest_version": "v1alpha1",
+  "report": {
+    "title": "Agent Policy Coverage and Attack Path",
+    "generated_at": "2026-10-24T04:10:35Z",
+    "spec_name": "policy-coverage",
+    "spec_version": "1.0.0",
+    "spec_digest": "sha256:ad047a384ec82ef72dd3cac9925d34d2415596109872b6aae7949bbdd81dd841"
+  },
+  "hosts": [],
+  "sources": [
+    {
+      "adapter": "jsonl",
+      "uri": "policy-coverage.jsonl",
+      "digest": "sha256:55df783cf4858d8fcd0f6052ff34e9da3fd50474a9896e7a9550c780cd19d00a",
+      "evaluations": [
+        "coverage",
+        "attack",
+        "configs"
+      ],
+      "run_id": "coverage-run-2026-10-24"
+    }
+  ],
+  "subject": {
+    "kind": "agent",
+    "name": "support-agent (synthetic data)"
+  },
+  "run": {
+    "id": "coverage-run-2026-10-24",
+    "producer": {
+      "name": "reportspec-demo",
+      "version": "0.1"
+    },
+    "started_at": "2026-10-24T09:00:00Z",
+    "context": {
+      "environment": "demo",
+      "note": "Synthetic values for illustration only"
+    }
+  },
+  "params": {
+    "effective": {},
+    "overrides": {}
+  },
+  "bindings": {
+    "overall_score": {
+      "type": "scalar",
+      "ref": "verdict.score",
+      "status": "missing",
+      "value": null
+    },
+    "overall_threshold": {
+      "type": "scalar",
+      "ref": "verdict.threshold",
+      "status": "missing",
+      "value": null
+    },
+    "overall_pass": {
+      "type": "scalar",
+      "ref": "verdict.pass",
+      "status": "missing",
+      "value": null
+    },
+    "evaluations": {
+      "type": "table",
+      "ref": "@evaluations",
+      "status": "resolved",
+      "value": [
+        {
+          "id": "coverage",
+          "label": "Policy coverage",
+          "source": "policy-mapper (synthetic)",
+          "metric": null,
+          "score": null,
+          "threshold": null,
+          "pass": null
+        },
+        {
+          "id": "attack",
+          "label": "Attack flow",
+          "source": "red-team (synthetic)",
+          "metric": null,
+          "score": null,
+          "threshold": null,
+          "pass": null
+        },
+        {
+          "id": "configs",
+          "label": "Agent configurations",
+          "source": "demo-harness (synthetic)",
+          "metric": null,
+          "score": null,
+          "threshold": null,
+          "pass": null
+        }
+      ]
+    },
+    "policy_nodes": {
+      "type": "table",
+      "ref": "coverage/nodes",
+      "status": "resolved",
+      "value": [
+        {
+          "id": "C-D1",
+          "label": "Minimize customer data",
+          "group": "Policy: Data handling"
+        },
+        {
+          "id": "C-D2",
+          "label": "Redact PII in logs",
+          "group": "Policy: Data handling"
+        },
+        {
+          "id": "C-D3",
+          "label": "30-day retention",
+          "group": "Policy: Data handling"
+        },
+        {
+          "id": "C-T1",
+          "label": "Least-privilege tools",
+          "group": "Policy: Tool use"
+        },
+        {
+          "id": "C-T2",
+          "label": "Approve payments",
+          "group": "Policy: Tool use"
+        },
+        {
+          "id": "C-T3",
+          "label": "No credential access",
+          "group": "Policy: Tool use"
+        },
+        {
+          "id": "C-O1",
+          "label": "Keep an audit trail",
+          "group": "Policy: Oversight"
+        },
+        {
+          "id": "C-O2",
+          "label": "Escalate unsafe requests",
+          "group": "Policy: Oversight"
+        },
+        {
+          "id": "C-C1",
+          "label": "Refuse harmful requests",
+          "group": "Policy: Content"
+        },
+        {
+          "id": "C-C2",
+          "label": "Disclose AI identity",
+          "group": "Policy: Content"
+        },
+        {
+          "id": "R-PI",
+          "label": "Prompt injection",
+          "group": "Risk: Security"
+        },
+        {
+          "id": "R-CE",
+          "label": "Credential exfiltration",
+          "group": "Risk: Security"
+        },
+        {
+          "id": "R-TM",
+          "label": "Tool misuse",
+          "group": "Risk: Security"
+        },
+        {
+          "id": "R-PL",
+          "label": "PII leakage",
+          "group": "Risk: Privacy"
+        },
+        {
+          "id": "R-OR",
+          "label": "Over-retention",
+          "group": "Risk: Privacy"
+        },
+        {
+          "id": "R-HC",
+          "label": "Harmful content",
+          "group": "Risk: Safety"
+        },
+        {
+          "id": "R-DE",
+          "label": "Deception",
+          "group": "Risk: Safety"
+        },
+        {
+          "id": "R-UA",
+          "label": "Unaccountable actions",
+          "group": "Risk: Governance"
+        }
+      ]
+    },
+    "policy_links": {
+      "type": "table",
+      "ref": "coverage/links",
+      "status": "resolved",
+      "value": [
+        {
+          "source": "C-D1",
+          "target": "R-PL"
+        },
+        {
+          "source": "C-D1",
+          "target": "R-OR"
+        },
+        {
+          "source": "C-D2",
+          "target": "R-PL"
+        },
+        {
+          "source": "C-D2",
+          "target": "R-CE"
+        },
+        {
+          "source": "C-D3",
+          "target": "R-OR"
+        },
+        {
+          "source": "C-T1",
+          "target": "R-TM"
+        },
+        {
+          "source": "C-T1",
+          "target": "R-CE"
+        },
+        {
+          "source": "C-T2",
+          "target": "R-TM"
+        },
+        {
+          "source": "C-T2",
+          "target": "R-UA"
+        },
+        {
+          "source": "C-T3",
+          "target": "R-CE"
+        },
+        {
+          "source": "C-O1",
+          "target": "R-UA"
+        },
+        {
+          "source": "C-O2",
+          "target": "R-HC"
+        },
+        {
+          "source": "C-O2",
+          "target": "R-DE"
+        },
+        {
+          "source": "C-C1",
+          "target": "R-HC"
+        },
+        {
+          "source": "C-C2",
+          "target": "R-DE"
+        }
+      ]
+    },
+    "flow_nodes": {
+      "type": "table",
+      "ref": "attack/nodes",
+      "status": "resolved",
+      "value": [
+        {
+          "id": "S1",
+          "label": "Plant instruction in web page",
+          "group": "Attack step"
+        },
+        {
+          "id": "S2",
+          "label": "Agent follows planted text",
+          "group": "Attack step"
+        },
+        {
+          "id": "S3",
+          "label": "Agent runs shell tool",
+          "group": "Attack step"
+        },
+        {
+          "id": "S4",
+          "label": "Read environment credentials",
+          "group": "Attack step"
+        },
+        {
+          "id": "S5",
+          "label": "Send to attacker URL",
+          "group": "Attack step"
+        },
+        {
+          "id": "R-PI",
+          "label": "Prompt injection",
+          "group": "Risk"
+        },
+        {
+          "id": "R-CE",
+          "label": "Credential exfiltration",
+          "group": "Risk"
+        },
+        {
+          "id": "K1",
+          "label": "Input filter",
+          "group": "Control"
+        },
+        {
+          "id": "K2",
+          "label": "Sandbox without env vars",
+          "group": "Control"
+        },
+        {
+          "id": "K3",
+          "label": "Egress allowlist",
+          "group": "Control"
+        }
+      ]
+    },
+    "flow_links": {
+      "type": "table",
+      "ref": "attack/links",
+      "status": "resolved",
+      "value": [
+        {
+          "source": "S1",
+          "target": "S2"
+        },
+        {
+          "source": "S2",
+          "target": "S3"
+        },
+        {
+          "source": "S3",
+          "target": "S4"
+        },
+        {
+          "source": "S4",
+          "target": "S5"
+        },
+        {
+          "source": "S2",
+          "target": "R-PI"
+        },
+        {
+          "source": "S5",
+          "target": "R-CE"
+        },
+        {
+          "source": "K1",
+          "target": "S2"
+        },
+        {
+          "source": "K2",
+          "target": "S4"
+        },
+        {
+          "source": "K3",
+          "target": "S5"
+        }
+      ]
+    },
+    "configs": {
+      "type": "table",
+      "ref": "configs/scores",
+      "status": "resolved",
+      "value": [
+        {
+          "config": "Baseline",
+          "task_utility": 0.94,
+          "attack_success_rate": 0.33,
+          "policy_coverage": 0.4,
+          "false_refusals": 0.02,
+          "latency_p95": 4.1
+        },
+        {
+          "config": "Input filter",
+          "task_utility": 0.91,
+          "attack_success_rate": 0.18,
+          "policy_coverage": 0.55,
+          "false_refusals": 0.07,
+          "latency_p95": 4.6
+        },
+        {
+          "config": "Sandbox",
+          "task_utility": 0.93,
+          "attack_success_rate": 0.12,
+          "policy_coverage": 0.6,
+          "false_refusals": 0.03,
+          "latency_p95": null
+        },
+        {
+          "config": "Filter and sandbox",
+          "task_utility": 0.89,
+          "attack_success_rate": 0.04,
+          "policy_coverage": 0.85,
+          "false_refusals": 0.08,
+          "latency_p95": 5.2
+        }
+      ]
+    }
+  },
+  "viz": [
+    {
+      "id": "policy-risk-bundle",
+      "type": "bundle",
+      "data": "policy_links",
+      "payload_digest": "sha256:4b932b624c5d4a860871eb626312ca8d5e3e8e52cf5b1da59bf9a5a23efa98e4"
+    },
+    {
+      "id": "attack-flow",
+      "type": "graph",
+      "data": "flow_links",
+      "payload_digest": "sha256:3ca16d52be2749c53c7a5a33d70813e2f0b1b0c86634ac7f8657787994b9443a"
+    },
+    {
+      "id": "config-parallel",
+      "type": "parallel",
+      "data": "configs",
+      "payload_digest": "sha256:0e3f1c6e7b53aa6dc3f7a9c84d3ae65a2a70c8a16b963dcc9b32852a1b71c8de"
+    },
+    {
+      "id": "config-table",
+      "type": "table",
+      "data": "configs",
+      "payload_digest": null
+    }
+  ],
+  "warnings": [],
+  "markdown": "\n# Agent Policy Coverage and Attack Path\n\n**Agent:** `support-agent (synthetic data)` \u00b7 **Run:** `coverage-run-2026-10-24` \u00b7 **Generated:** 2026-10-24T04:10:35Z\n\n> Every value in this report is synthetic. It shows what three chart types add to a report: how a policy maps to risks, how an attack moves, and how several measurements compare at once.\n\n## 1. Policy to risk mapping\n\nEach curve joins a policy clause to a risk it addresses. Clauses and risks sit on one circle, grouped by policy section and risk category, and curves between groups are pulled together so shared routes read as bands. **A risk with no curve ending on it is not covered by any clause.** Here that is prompt injection.\n\n**Figure: Policy clauses and the risks they address** (bundle)\n\n| Source | Group | Target | Group |\n|---|---|---|---|\n| Minimize customer data | Policy: Data handling | PII leakage | Risk: Privacy |\n| Minimize customer data | Policy: Data handling | Over-retention | Risk: Privacy |\n| Redact PII in logs | Policy: Data handling | PII leakage | Risk: Privacy |\n| Redact PII in logs | Policy: Data handling | Credential exfiltration | Risk: Security |\n| 30-day retention | Policy: Data handling | Over-retention | Risk: Privacy |\n| Least-privilege tools | Policy: Tool use | Tool misuse | Risk: Security |\n| Least-privilege tools | Policy: Tool use | Credential exfiltration | Risk: Security |\n| Approve payments | Policy: Tool use | Tool misuse | Risk: Security |\n| Approve payments | Policy: Tool use | Unaccountable actions | Risk: Governance |\n| No credential access | Policy: Tool use | Credential exfiltration | Risk: Security |\n| Keep an audit trail | Policy: Oversight | Unaccountable actions | Risk: Governance |\n| Escalate unsafe requests | Policy: Oversight | Harmful content | Risk: Safety |\n| Escalate unsafe requests | Policy: Oversight | Deception | Risk: Safety |\n| Refuse harmful requests | Policy: Content | Harmful content | Risk: Safety |\n| Disclose AI identity | Policy: Content | Deception | Risk: Safety |\n\nNot linked: Prompt injection.\n\n## 2. Attack path\n\nA prompt-injection attack that ends in credential exfiltration, with the controls that interrupt it. Arrows point from an attack step to the next step, or to the risk it realizes; a control points at the step it blocks. The layout is computed from the links, so position carries no meaning: follow the arrows.\n\n**Figure: Attack flow and the controls that interrupt it** (graph)\n\n| Source | Group | Target | Group |\n|---|---|---|---|\n| Plant instruction in web page | Attack step | Agent follows planted text | Attack step |\n| Agent follows planted text | Attack step | Agent runs shell tool | Attack step |\n| Agent runs shell tool | Attack step | Read environment credentials | Attack step |\n| Read environment credentials | Attack step | Send to attacker URL | Attack step |\n| Agent follows planted text | Attack step | Prompt injection | Risk |\n| Send to attacker URL | Attack step | Credential exfiltration | Risk |\n| Input filter | Control | Agent follows planted text | Attack step |\n| Sandbox without env vars | Control | Read environment credentials | Attack step |\n| Egress allowlist | Control | Send to attacker URL | Attack step |\n\n## 3. What each defense buys\n\nEach line is one agent configuration and each vertical axis is one measurement on its own scale. Axes where lower is better are flipped, so a line near the top is good on every axis. The sandbox run has no latency measurement: its line stops at the previous axis and is not drawn through zero.\n\n**Figure: Four agent configurations across five measurements** (parallel)\n\n| Config | Task utility | Attack success rate (lower is better) | Policy coverage | False refusals (lower is better) | Latency p95 (lower is better) |\n|---|---:|---:|---:|---:|---:|\n| Baseline | 94% | 33% | 40% | 2% | 4.1 |\n| Input filter | 91% | 18% | 55% | 7% | 4.6 |\n| Sandbox | 93% | 12% | 60% | 3% | N/A |\n| Filter and sandbox | 89% | 4% | 85% | 8% | 5.2 |\n\nThe exact values behind the lines:\n\n**Figure: config-table** (table)\n\n| Configuration | Task utility | Attack success | Policy coverage | False refusals | p95 latency (s) |\n|---|---:|---:|---:|---:|---:|\n| Baseline | 94% | 33% | 40% | 2% | 4.1 |\n| Input filter | 91% | 18% | 55% | 7% | 4.6 |\n| Sandbox | 93% | 12% | 60% | 3% | *data unavailable* |\n| Filter and sandbox | 89% | 4% | 85% | 8% | 5.2 |\n"
+}

@@ -1,0 +1,10 @@
+description: "a graph reads one table of links and one of nodes; the Markdown fallback lists each link with its groups"
+inputs:
+- ../inputs/network.jsonl
+expect:
+  validate: valid
+  render: ok
+  markdown_contains:
+  - '| Source | Group | Target | Group |'
+  - '| Alpha | x | Beta | x |'
+  - '| Alpha | x | Gamma | y |'

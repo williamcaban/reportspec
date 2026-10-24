@@ -50,7 +50,7 @@ Use `--format html` or `--format docx` for the other outputs. Each run also writ
 ```bash
 reportspec validate examples/safety-compliance.report.md        # check a template without rendering
 reportspec bundle --input examples/inputs/midojo-results.json   # show the normalized results
-reportspec conformance conformance/                             # run the 34 conformance cases
+reportspec conformance conformance/                             # run the 46 conformance cases
 ```
 
 All options are in the [command line reference](docs/cli.md). From a clone you can also use `uv run reportspec …`.
@@ -86,6 +86,7 @@ Rendered samples checked into the repository, so you can see the result without 
 | [Model release readiness (PDF)](examples/output/model-release.pdf), [HTML](examples/output/model-release.html), [DOCX](examples/output/model-release.docx) | [template](examples/model-release.report.md), [JSONL](examples/inputs/model-release.jsonl) | Every chart type, from one JSONL file. Synthetic data |
 | [Safety compliance brief (PDF)](examples/output/safety-compliance.pdf) | [template](examples/safety-compliance.report.md), [EvalHub job](examples/inputs/evalhub-job.json) | One EvalHub collection run for a compliance reader |
 | [Agent red-team report (PDF)](examples/output/agent-redteam.pdf), [DOCX](examples/output/agent-redteam.docx) | [template](examples/agent-redteam.report.md), [three native inputs](examples/inputs/) | Policy Mapper risks, MiDojo red team and EvalHub results in one report |
+| [Policy coverage and attack path (PDF)](examples/output/policy-coverage.pdf), [HTML](examples/output/policy-coverage.html) | [template](examples/policy-coverage.report.md), [JSONL](examples/inputs/policy-coverage.jsonl) | Edge bundling, a force-directed graph and parallel coordinates. Synthetic data |
 | [Quickstart (PDF)](examples/output/quickstart.pdf) | [template](examples/quickstart.report.md), [JSONL](examples/inputs/quickstart.jsonl) | The smallest useful report, used in the [tutorial](docs/tutorial.md) |
 
 ## What a template looks like
@@ -111,7 +112,7 @@ Results come in as JSONL, one object per line:
 {"evaluation": "safety", "metric": "hallucination_probe", "value": null}
 ```
 
-Charts, tables and cards are drawn only from resolved data. Pass/fail marks come from the threshold and direction the author states, or from the producer's verdict. N/A is never plotted as zero. Chart types: `radar`, `radial`, `boxplot`, `bar`, `line`, `heatmap`, `table`, `summary_cards`.
+Charts, tables and cards are drawn only from resolved data. Pass/fail marks come from the threshold and direction the author states, or from the producer's verdict. N/A is never plotted as zero. Chart types: `radar`, `radial`, `boxplot`, `bar`, `line`, `heatmap`, `graph` (force-directed), `bundle` (edge bundling), `parallel` (parallel coordinates), `table`, `summary_cards`.
 
 ## Documentation
 
@@ -126,7 +127,7 @@ Charts, tables and cards are drawn only from resolved data. Pass/fail marks come
 - [Command line](docs/cli.md): commands, options, exit codes
 - [Running in a container](docs/container.md): build and run the image
 - [Render service](docs/service.md): the optional HTTP API and playground
-- [Output and conformance](docs/output-and-conformance.md): the evidence manifest and the 34 conformance cases
+- [Output and conformance](docs/output-and-conformance.md): the evidence manifest and the 46 conformance cases
 
 **Background**
 - [Concepts and design](docs/concepts.md): why it exists and how the layers fit

@@ -1,0 +1,60 @@
+{"subject":{"kind":"agent","name":"support-agent (synthetic data)"},"run":{"id":"coverage-run-2026-10-24","producer":{"name":"reportspec-demo","version":"0.1"},"started_at":"2026-10-24T09:00:00Z","context":{"environment":"demo","note":"Synthetic values for illustration only"}}}
+{"evaluation":"coverage","label":"Policy coverage","source":"policy-mapper (synthetic)"}
+{"evaluation":"coverage","set":"nodes","id":"C-D1","group":"Policy: Data handling","name":"Minimize customer data"}
+{"evaluation":"coverage","set":"nodes","id":"C-D2","group":"Policy: Data handling","name":"Redact PII in logs"}
+{"evaluation":"coverage","set":"nodes","id":"C-D3","group":"Policy: Data handling","name":"30-day retention"}
+{"evaluation":"coverage","set":"nodes","id":"C-T1","group":"Policy: Tool use","name":"Least-privilege tools"}
+{"evaluation":"coverage","set":"nodes","id":"C-T2","group":"Policy: Tool use","name":"Approve payments"}
+{"evaluation":"coverage","set":"nodes","id":"C-T3","group":"Policy: Tool use","name":"No credential access"}
+{"evaluation":"coverage","set":"nodes","id":"C-O1","group":"Policy: Oversight","name":"Keep an audit trail"}
+{"evaluation":"coverage","set":"nodes","id":"C-O2","group":"Policy: Oversight","name":"Escalate unsafe requests"}
+{"evaluation":"coverage","set":"nodes","id":"C-C1","group":"Policy: Content","name":"Refuse harmful requests"}
+{"evaluation":"coverage","set":"nodes","id":"C-C2","group":"Policy: Content","name":"Disclose AI identity"}
+{"evaluation":"coverage","set":"nodes","id":"R-PI","group":"Risk: Security","name":"Prompt injection"}
+{"evaluation":"coverage","set":"nodes","id":"R-CE","group":"Risk: Security","name":"Credential exfiltration"}
+{"evaluation":"coverage","set":"nodes","id":"R-TM","group":"Risk: Security","name":"Tool misuse"}
+{"evaluation":"coverage","set":"nodes","id":"R-PL","group":"Risk: Privacy","name":"PII leakage"}
+{"evaluation":"coverage","set":"nodes","id":"R-OR","group":"Risk: Privacy","name":"Over-retention"}
+{"evaluation":"coverage","set":"nodes","id":"R-HC","group":"Risk: Safety","name":"Harmful content"}
+{"evaluation":"coverage","set":"nodes","id":"R-DE","group":"Risk: Safety","name":"Deception"}
+{"evaluation":"coverage","set":"nodes","id":"R-UA","group":"Risk: Governance","name":"Unaccountable actions"}
+{"evaluation":"coverage","set":"links","from":"C-D1","to":"R-PL"}
+{"evaluation":"coverage","set":"links","from":"C-D1","to":"R-OR"}
+{"evaluation":"coverage","set":"links","from":"C-D2","to":"R-PL"}
+{"evaluation":"coverage","set":"links","from":"C-D2","to":"R-CE"}
+{"evaluation":"coverage","set":"links","from":"C-D3","to":"R-OR"}
+{"evaluation":"coverage","set":"links","from":"C-T1","to":"R-TM"}
+{"evaluation":"coverage","set":"links","from":"C-T1","to":"R-CE"}
+{"evaluation":"coverage","set":"links","from":"C-T2","to":"R-TM"}
+{"evaluation":"coverage","set":"links","from":"C-T2","to":"R-UA"}
+{"evaluation":"coverage","set":"links","from":"C-T3","to":"R-CE"}
+{"evaluation":"coverage","set":"links","from":"C-O1","to":"R-UA"}
+{"evaluation":"coverage","set":"links","from":"C-O2","to":"R-HC"}
+{"evaluation":"coverage","set":"links","from":"C-O2","to":"R-DE"}
+{"evaluation":"coverage","set":"links","from":"C-C1","to":"R-HC"}
+{"evaluation":"coverage","set":"links","from":"C-C2","to":"R-DE"}
+{"evaluation":"attack","label":"Attack flow","source":"red-team (synthetic)"}
+{"evaluation":"attack","set":"nodes","id":"S1","group":"Attack step","name":"Plant instruction in web page"}
+{"evaluation":"attack","set":"nodes","id":"S2","group":"Attack step","name":"Agent follows planted text"}
+{"evaluation":"attack","set":"nodes","id":"S3","group":"Attack step","name":"Agent runs shell tool"}
+{"evaluation":"attack","set":"nodes","id":"S4","group":"Attack step","name":"Read environment credentials"}
+{"evaluation":"attack","set":"nodes","id":"S5","group":"Attack step","name":"Send to attacker URL"}
+{"evaluation":"attack","set":"nodes","id":"R-PI","group":"Risk","name":"Prompt injection"}
+{"evaluation":"attack","set":"nodes","id":"R-CE","group":"Risk","name":"Credential exfiltration"}
+{"evaluation":"attack","set":"nodes","id":"K1","group":"Control","name":"Input filter"}
+{"evaluation":"attack","set":"nodes","id":"K2","group":"Control","name":"Sandbox without env vars"}
+{"evaluation":"attack","set":"nodes","id":"K3","group":"Control","name":"Egress allowlist"}
+{"evaluation":"attack","set":"links","from":"S1","to":"S2"}
+{"evaluation":"attack","set":"links","from":"S2","to":"S3"}
+{"evaluation":"attack","set":"links","from":"S3","to":"S4"}
+{"evaluation":"attack","set":"links","from":"S4","to":"S5"}
+{"evaluation":"attack","set":"links","from":"S2","to":"R-PI"}
+{"evaluation":"attack","set":"links","from":"S5","to":"R-CE"}
+{"evaluation":"attack","set":"links","from":"K1","to":"S2"}
+{"evaluation":"attack","set":"links","from":"K2","to":"S4"}
+{"evaluation":"attack","set":"links","from":"K3","to":"S5"}
+{"evaluation":"configs","label":"Agent configurations","source":"demo-harness (synthetic)"}
+{"evaluation":"configs","set":"scores","config":"Baseline","task_utility":0.94,"attack_success_rate":0.33,"policy_coverage":0.4,"false_refusals":0.02,"latency_p95":4.1}
+{"evaluation":"configs","set":"scores","config":"Input filter","task_utility":0.91,"attack_success_rate":0.18,"policy_coverage":0.55,"false_refusals":0.07,"latency_p95":4.6}
+{"evaluation":"configs","set":"scores","config":"Sandbox","task_utility":0.93,"attack_success_rate":0.12,"policy_coverage":0.6,"false_refusals":0.03,"latency_p95":null}
+{"evaluation":"configs","set":"scores","config":"Filter and sandbox","task_utility":0.89,"attack_success_rate":0.04,"policy_coverage":0.85,"false_refusals":0.08,"latency_p95":5.2}

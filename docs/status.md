@@ -2,6 +2,16 @@
 
 ReportSpec is a v1alpha1 proof of concept (POC), not a final or adopted design. This page records what has been checked and what is still undecided.
 
+## Verified on 2026-10-24: graph, bundle and parallel charts
+
+Checked on macOS with Python 3.13.15 and `vl-convert` 1.9.0, not yet in the containers or in CI:
+
+- `conformance/`: 46/46, including 12 new cases (35 to 46) for the three chart types. `pytest`: 91 passed, 4 skipped (the PDF tests, because Pango cannot be loaded inside the pytest process on this Mac; they run in CI). Four of the 19 new tests were mutation-checked: breaking the force-layout field reference, the fit to the frame, the axis flip or the Vega error handling each fails the matching test.
+- The example report [`policy-coverage`](../examples/policy-coverage.report.md) renders to HTML and to a 4-page Letter PDF, whose `pdffonts` lists only Red Hat fonts. All three figures were looked at in the PDF, not only rendered without error.
+- Found by looking and by stress tests, not by a failed render: Vega's force layout has no bounds and spilled a 25-node graph 260 px outside a 680 px frame, so the layout runs first, is read back from the scenegraph and is fitted to the frame (the 80-node limit stays inside it); a force with a wrong field reference draws every node at (0, 0) without an error; `linkpath` parameters are field names unless wrapped in `expr`, and inside `expr` the row is `datum.datum`; the JSONL keys `label` and `source` are reserved, so a link table with a `source` column drew nothing (the chart now says "No links to draw: 15 not drawable" instead of showing a blank).
+- Determinism: the same payload gives a byte-identical SVG in repeat runs and in separate processes on this machine. Not checked across platforms or `vl-convert` versions.
+- Not verified: the containers and CI with these examples (CI now renders the example to PDF and audits its fonts), the HTML in a browser, DOCX in real Word, graphs of 30 to 80 nodes beyond the generated ones (an 80-node random graph is a hairball, as expected; the limit is a ceiling, not a promise of legibility), CJK labels, label collisions in dense graphs.
+
 ## Verified on 2026-10-23
 
 - `conformance/`: 34/34. Both new examples and the two older ones render to PDF; the showcase renders to HTML (checked in Chrome) and to a 6-page Letter PDF with embedded fonts and selectable chart text.

@@ -1,0 +1,13 @@
+{"subject":{"kind":"agent","name":"net-agent"},"run":{"id":"net-1"}}
+{"evaluation":"net","set":"nodes","id":"a","name":"Alpha","group":"x"}
+{"evaluation":"net","set":"nodes","id":"b","name":"Beta","group":"x"}
+{"evaluation":"net","set":"nodes","id":"c","name":"Gamma","group":"y"}
+{"evaluation":"net","set":"nodes","id":"d","name":"<script>alert(1)</script>","group":"y"}
+{"evaluation":"net","set":"links","from":"a","to":"b"}
+{"evaluation":"net","set":"links","from":"a","to":"c"}
+{"evaluation":"net","set":"links","from":"c","to":"d"}
+{"evaluation":"net","set":"links","from":"a","to":null}
+{"evaluation":"net","set":"links","from":"b","to":"zz"}
+{"evaluation":"net","set":"scores","config":"A","utility":0.9,"asr":0.3,"latency":4.0}
+{"evaluation":"net","set":"scores","config":"B","utility":0.8,"asr":0.1,"latency":null}
+{"evaluation":"net","set":"scores","config":"C","utility":0.7,"asr":0.2,"latency":5.0}

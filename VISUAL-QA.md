@@ -25,7 +25,7 @@ These three are permanent regression cases (see "Regression cases"). The first f
 
 ## Implementation status (2026-10-23)
 
-The proof-of-concept renderer ([`charts.py`](src/reportspec/charts.py), [`htmlout.py`](src/reportspec/htmlout.py)) was reviewed by rendering the showcase report to PDF and HTML and looking at every page (layer H). Layers A and G are not built yet; conformance cases 30 to 32 cover parts of VQA-3, VQA-9, VQA-15, VQA-16 and VQA-18.
+The proof-of-concept renderer ([`charts.py`](src/reportspec/charts.py), [`htmlout.py`](src/reportspec/htmlout.py)) was reviewed by rendering the showcase report to PDF and HTML and looking at every page (layer H). Layers A and G are not built yet; conformance cases 30 to 32 cover parts of VQA-3, VQA-9, VQA-15, VQA-16 and VQA-18. The graph, bundle and parallel charts (added 2026-10-24) were reviewed the same way, on the policy-coverage example in PDF; conformance cases 35 to 46 and `tests/test_network_charts.py` cover VQA-1 (inside the frame), VQA-3 (N/A and uncountable links), VQA-16 and VQA-18 for them.
 
 | Requirement | State |
 |---|---|
@@ -75,7 +75,7 @@ Each requirement is checked at one or more layers: **A** automated check, **G** 
 | ID | Requirement | Layer |
 |---|---|---|
 | VQA-15 | **Degenerate data has a defined rendering.** Empty data, one point, all N/A, all values equal, zero-variance box, negative values and values outside `range` each produce a labeled placeholder or a clamped mark with a note. Blank output is a defect. Must | A, G |
-| VQA-16 | **Density limits.** Each type has a documented limit (implemented: radar 3 to 12 axes, radial up to 8 items; proposed: heatmap up to 40 columns). Beyond it the renderer fails with a message or degrades to a table. It never produces an unreadable chart. Must | A |
+| VQA-16 | **Density limits.** Each type has a documented limit (implemented: radar 3 to 12 axes, radial up to 8 items, graph up to 80 nodes and 200 links, bundle up to 120 nodes and 400 links, graph and bundle up to 8 groups, parallel 2 to 10 axes and up to 8 lines; proposed: heatmap up to 40 columns). Beyond it the renderer fails with a message or degrades to a table. It never produces an unreadable chart. Must | A |
 | VQA-17 | **Data parity.** Every value shown in a chart also appears in its Markdown table fallback and its alt text, with the same formatting. Must | A |
 
 ### Safety and reproducibility
@@ -126,6 +126,11 @@ Each chart type gets a conformance case rendering these states, which double as 
 | VQ-R6 | Value labels vs threshold | A horizontal bar with a threshold: no value label is crossed by the threshold line |
 | VQ-R7 | Proprietary font leak | `pdffonts` on the showcase PDF lists only Red Hat Text and Red Hat Mono. The first full render embedded Helvetica Neue, Menlo and Noto from the Mac that built it |
 | VQ-R8 | Missing glyphs | No template or generated text uses a character Red Hat Text lacks (✓ ✗ ⚠ → ≥ ≤); status marks are SVG icons |
+| VQ-R9 | Force layout outside the frame | A 25-node graph drew nodes up to 260 px outside the 680 px frame (Vega's force layout has no bounds). Graphs of 10, 25, 50 and 80 nodes keep every node inside the figure |
+| VQ-R10 | Nodes stacked at the origin | A force given a wrong field reference drew every node at (0, 0) with no error. A graph's nodes occupy distinct positions across the frame |
+| VQ-R11 | Missing arrowheads | Arrowheads built from a mark derived from another mark were never drawn, and the error went to stderr. Every directed link ends in an arrowhead |
+| VQ-R12 | A blank chart for unusable data | A link table with no usable ends drew an empty frame. It now says "No links to draw: 15 not drawable" |
+| VQ-R13 | Legend under the marks | A graph's last nodes sat on its legend. The legend sits below the frame the layout is fitted to |
 
 ## Open questions
 
