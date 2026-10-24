@@ -14,7 +14,7 @@ ReportSpec is a proof of concept (POC) at v1alpha1: not final, not adopted by Ev
 | **Reproducible output** | Honor `SOURCE_DATE_EPOCH` so two renders of the same inputs are byte-identical; today only `generated_at` differs |
 | **Base image pin** | Reference the Fedora base image by digest, not tag |
 | **WOFF2 fonts** | Smaller HTML (about 60%), once the Red Hat font license allows it |
-| **ASAGO-ADR-0002** | A proposal for ASAGO to adopt ReportSpec for report generation ([ASAGO page](hosts/asago.md)) |
+| **ASAGO-ADR-0002 draft** | ASAGO has its own [draft ADR for a report generator](https://github.com/asago-ai/architecture-decision-records/pull/2). Next: settle how ReportSpec relates to it and what it would need (adapters for the Scenario Generator and Artifact Generator, an envelope adapter, a public Python API). See the [ASAGO page](hosts/asago.md#the-asago-adr-0002-draft) |
 
 ## Not yet verified
 

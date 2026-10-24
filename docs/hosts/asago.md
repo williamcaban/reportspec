@@ -1,8 +1,8 @@
 # ReportSpec host profile: ASAGO
 
-**Status:** DRAFT, a proposal from a proof of concept for the ASAGO community. ASAGO has not adopted it · **Docs:** [index](../README.md) · **Implemented:** the `midojo` and `asago-risk-extraction` adapters. **Proposals, not implemented:** the API and ASAGO-ADR-0002 · **Related:** [ASAGO-ADR-0001](https://github.com/asago-ai/architecture-decision-records/blob/main/architecture-decision-records/ASAGO-ADR-0001-asago-server.md) (server; leaves report generation to a separate ADR)
+**Status:** DRAFT, a proposal from a proof of concept for the ASAGO community. ASAGO has not adopted it · **Docs:** [index](../README.md) · **Implemented:** the `midojo` and `asago-risk-extraction` adapters, and the standalone [render service](../service.md) (not specific to ASAGO). **Proposals, not implemented:** an ASAGO-server form of that API, and how ReportSpec relates to the ASAGO-ADR-0002 draft · **Related:** [ASAGO-ADR-0001](https://github.com/asago-ai/architecture-decision-records/blob/main/architecture-decision-records/ASAGO-ADR-0001-asago-server.md) (server; leaves report generation to a separate ADR) and the [ASAGO-ADR-0002 draft "Reporting"](https://github.com/asago-ai/architecture-decision-records/pull/2) (ASAGO's own design for a report generator, an open pull request)
 
-This profile covers how ASAGO would host ReportSpec: its adapters, an API that fits ADR-0001's stateless design, and its host namespace. Repos were checked on 2026-10-20: `midojo` 337470f, `asago-examples` b79020d, `architecture-decision-records` main.
+This profile covers how ASAGO would host ReportSpec: its adapters, how its stateless API fits ADR-0001, how it compares with the ADR-0002 draft, and its host namespace. Repos were checked on 2026-10-20: `midojo` 337470f, `asago-examples` b79020d, `architecture-decision-records` main. The ADR-0002 draft (pull request 2, open since 2026-10-16) was read on 2026-10-24; it is a draft and may change. Nobody on the ASAGO side has reviewed this page.
 
 ## Why ASAGO needs it
 
@@ -51,32 +51,20 @@ The Policy Mapper reports undefined precision or recall as `null` "so they can't
 
 **Subject.** A risk extraction is about a policy, not about the system under test, so this adapter sets no `subject`. The policy goes into `run.context` instead. The subject comes from whichever input evaluates the system (MiDojo's agent or EvalHub's model), or from a caller-built bundle.
 
-## API: stateless, data in and data out (proposal)
+## API: stateless, data in and data out
 
-Not implemented. The standalone `reportspec` command and, later, a FastAPI service would provide it.
+**What exists.** The standalone [render service](../service.md) (`reportspec serve`) is not tied to ASAGO. Its endpoints are `POST /v1/validate`, `/v1/bundle` and `/v1/render`. A request carries the template and the results as JSON; the response is the document itself (PDF, HTML, DOCX or Markdown), with the template's digest in a header; `format: json` returns the evidence manifest. A result input can be a native document, such as a Policy Mapper `risk-extraction.json` or a MiDojo `results.json`, and the adapter is detected. It returns documents, not ADR-0001 envelopes.
 
-ADR-0001 makes the ASAGO server stateless: the caller owns orchestration and storage, and each endpoint returns versioned JSON in a light envelope. ReportSpec fits that without change. The spec and the inputs travel in the request, and the evidence manifest comes back.
+**What does not exist.** An ASAGO-server form of it: an endpoint inside the Asago Server, taking ADR-0001 envelopes and returning one. Whether that is built, and with what request shape, depends on the ADR-0002 discussion below.
 
-```text
-POST /v1/reportspecs:validate     body: the .report.md (text/markdown)
-POST /v1/bundles                  { inputs: [{adapter?, payload}] }            → envelope(ResultsBundle)
-POST /v1/reports:render           { spec: "<.report.md>", inputs: [{adapter?, payload}] | bundle,
-                                    params: {}, formats: [markdown, html, json] } → envelope(manifest + outputs)
-```
+How the existing service lines up with ADR-0001:
 
-Envelope fields are illustrative, following ADR-0001's "separate version metadata for the envelope and payload schema", which "identifies the producer and its component release":
-
-```json
-{ "envelope_version": "1", "producer": { "component": "report-renderer", "release": "0.1.0" },
-  "payload_schema": "reportspec.evidence-manifest/v1alpha1", "payload": { "manifest_version": "v1alpha1", "…": "…" } }
-```
-
-| ADR-0001 rule | How this API meets it |
+| ADR-0001 rule | How the service meets it |
 |---|---|
-| Stateless, no retained run state | Spec and inputs arrive in each call; nothing is stored |
-| Components independently usable | `bundles` and `reports:render` work without a prior call to another component; the renderer is also a Python package and CLI |
-| Versioned contracts, separate from the component release | `reportspec/v1alpha1`, `results-bundle/v1alpha1` and `evidence-manifest/v1alpha1` are versioned on their own |
-| Invalid input or unsupported version → 4xx | Spec validation errors and unknown adapters return 4xx, with reasons that contain no result data |
+| Stateless, no retained run state | Template and results arrive in each call, and nothing is stored. Details of an unexpected failure go to the server log |
+| Components independently usable | `/v1/bundle` and `/v1/render` need no prior call to another component; the renderer is also a Python package and a command line |
+| Versioned contracts, separate from the component release | `reportspec/v1alpha1`, `results-bundle/v1alpha1` and `evidence-manifest/v1alpha1` are versioned on their own. Payload schema versions of the ASAGO components are not checked (see below) |
+| Invalid input or unsupported version → 4xx | Template errors and unknown adapters return 4xx (`invalid_request`, `unknown_adapter`, `invalid_input`), with reasons that contain no result data. An unsupported *payload* version is not detected |
 | Evaluation execution is out of scope | The renderer only reads results, including EvalHub job JSON the caller fetched |
 
 ## Host namespace: `asago:`
@@ -86,15 +74,32 @@ asago:
   pipeline: [policy-mapper, midojo, evalhub]   # illustrative: which component outputs the report expects
 ```
 
-Nothing in the core depends on it. A caller or UI can use it to check that a pipeline produced every input before calling `reports:render`.
+Nothing in the core depends on it. A caller or UI can use it to check that a pipeline produced every input before calling `/v1/render`.
 
-## Proposed next step: ASAGO-ADR-0002 "Report generation"
+## The ASAGO-ADR-0002 draft
 
-ADR-0001 deliberately deferred this. An ADR in the existing template would cover:
+ADR-0001 left report generation to a separate ADR, and ASAGO has started one: [ASAGO-ADR-0002 "Reporting"](https://github.com/asago-ai/architecture-decision-records/pull/2). The draft defines a stateless **Report Generator**, released as a versioned Python package and exposed through the Asago Server. It takes an ordered list of versioned component envelopes (Policy Mapper, Scenario Generator, Artifact Generator), validates their payload schema versions, and returns a PDF, HTML or Markdown report, standalone for one envelope or combined for several. Its content is decided by component-specific handlers in code, with a PatternFly HTML template for presentation.
 
-- **What:** adopt ReportSpec as ASAGO's report format; add a stateless render endpoint and Python package.
-- **Goals:** one report across components; the same spec renders on EvalHub; evidence manifest with source digests.
-- **Non-goals:** storing reports or specs (the caller owns storage); computing verdicts; a dashboard.
-- **Alternatives:** keep per-component HTML templates (no cross-component report); an ASAGO-only template language (forks authors and tooling from EvalHub); a BI tool (fails the "no transforms" and offline requirements).
-- **Security:** results are untrusted input (agent outputs, injected payloads, policy text); the template sandbox, escaping and conformance cases 05, 06 and 12 apply.
-- **Open:** where the shared spec repo lives ([open question 1](../status.md#open-questions)), and whether MiDojo and the Policy Mapper emit bundles natively ([open question 2](../status.md#open-questions)).
+ReportSpec is a different way to meet the same goals, not an extension of that design: the content comes from a Markdown template bound to a results bundle, and the per-component logic shrinks to an adapter. The table compares them as the draft stands. "Gap" means ReportSpec does not do it today.
+
+| The draft (or its first review) asks for | ReportSpec today |
+|---|---|
+| A versioned Python package that components can import for their standalone report | A package and CLI exist, but there is no release and no documented public Python API. **Gap** |
+| PDF, HTML or Markdown, chosen per request | Also DOCX and JSON. One format per request |
+| Component-aware handling of Policy Mapper, Scenario Generator and Artifact Generator payloads | An adapter for Policy Mapper `risk-extraction` 0.3. **Gap:** none for Scenario Generator or Artifact Generator, whose payloads I have not seen. The `midojo` adapter covers a component the draft does not list |
+| Envelopes with an envelope version and a payload schema version; reject the whole request on an unsupported one | Adapters are detected by the shape of the document. The Policy Mapper adapter records the payload `version` but does not check it. **Gap:** no envelope adapter and no compatibility matrix |
+| A combined report across steps, joined by the identifiers payloads declare, reporting references that do not resolve | Several inputs combine into one bundle. **Gap:** bindings cannot join one record set to another, so an adapter would have to emit joined (denormalized) records. `graph` and `bundle` charts that draw links between records and count unresolved ends are in review ([#9](https://github.com/williamcaban/reportspec/pull/9)) |
+| Everything a report renders travels inline in the payload, so the generator needs no files or network | True of ReportSpec: adapters read only what the request carries, and rendering fetches nothing |
+| Stateless; nothing persisted | Stateless. Check what the server log can contain before promising "never logged" |
+| Single-file HTML that reads offline; online extras only on request | HTML is one file with inline charts and fonts and no network use. Interactive extras are on the [roadmap](../roadmap.md) |
+| PDF without a heavy dependency | No headless browser: WeasyPrint and Pango for PDF, pandoc only for DOCX, and `/v1/capabilities` reports which formats a server can produce |
+| HTML that conforms to PatternFly, with replaceable presentation templates | Not done: its own CSS and the Red Hat fonts, no PatternFly tokens. The template is the report spec, which sets content and layout together; there is no separate presentation theme. **Gap** |
+| A size limit or an attachment option for large reports | A request size limit (5 MB by default) and attachment responses |
+| Templates are trusted assets | The service takes a template in every request, a larger attack surface. An ASAGO endpoint should serve templates by name from its own configuration, or require authentication for a template in the request |
+| Not a generic JSON-to-report converter | Adapters accept only known formats, but the JSONL and `bundle` adapters are generic by design, so that a new producer needs no code |
+
+Two parts of the draft are outside what this repository can address: the Asago Server endpoint, and the choice of PatternFly.
+
+If ASAGO prefers to build on ReportSpec, the changes the ADR text would need are small: name the renderer, say that adapters (not handlers) carry the per-component logic and the compatibility matrix, and keep the draft's rules on statelessness, inline payloads and rejecting unsupported versions. Whether to do that is ASAGO's decision.
+
+**Open:** where the shared spec repository lives ([open question 1](../status.md#open-questions)), whether MiDojo and the Policy Mapper emit bundles natively ([open question 2](../status.md#open-questions)), and whether ASAGO wants templates in code (the draft) or in Markdown (ReportSpec).
