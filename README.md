@@ -11,6 +11,16 @@ ReportSpec is built for AI evaluation evidence: [EvalHub](docs/hosts/evalhub.md)
 - **Honest about gaps.** Missing data prints as "data unavailable" and can never be compared, so a metric that was never measured cannot show as PASS.
 - **Self-contained.** HTML is one file with inline charts and fonts; rendering needs no network.
 
+## Three ways to run it
+
+All three run the same renderer and give the same output. Pick the one that fits where you work:
+
+| Way | Use it when | Go to |
+|---|---|---|
+| **Command line** | You have Python 3.13+ and want to render from a terminal, a script or CI | [Install](#install) and [Command line](#command-line) below; [CLI reference](docs/cli.md) |
+| **Container** | You want no Python or system libraries on the machine, or need an offline, read-only run | [Container](#container) below; [full guide](docs/container.md) |
+| **HTTP service** (optional) | A program should call an API instead of running a command | [Render service](#http-service-optional) below; [full guide](docs/service.md) |
+
 ## Install
 
 Python 3.13 or later. Not on PyPI yet; install from GitHub:
@@ -21,11 +31,9 @@ uvx --from git+https://github.com/williamcaban/reportspec reportspec --version  
 pip install git+https://github.com/williamcaban/reportspec          # or plain pip, ideally in a virtualenv
 ```
 
-PDF output needs Pango (`dnf install pango`, `brew install pango`) and DOCX output needs `pandoc`. If you would rather not install anything, use the [container](#run-it-in-a-container).
+PDF output needs Pango (`dnf install pango`, `brew install pango`) and DOCX output needs `pandoc`. If you would rather not install anything, use the [container](docs/container.md).
 
 ## Run it
-
-ReportSpec runs from the command line or in a container, and has an optional HTTP service. All three give the same output.
 
 ### Command line
 
@@ -47,31 +55,18 @@ reportspec conformance conformance/                             # run the 34 con
 
 All options are in the [command line reference](docs/cli.md). From a clone you can also use `uv run reportspec …`.
 
-### Run it in a container
+### Container
 
-The image carries everything (Pango, pandoc, fonts, locked dependencies), runs offline and read-only, and needs no Python on your machine. There is no published image yet, so build it once from a clone:
-
-```bash
-podman build -t reportspec .                       # Fedora 43, Python 3.14. Add --build-arg PY=313 for Fedora 42, Python 3.13
-```
-
-Docker works the same way: `docker build -f Containerfile -t reportspec .`. Then run any command from above after the image name. The examples are inside the image:
+The image carries everything (Pango, pandoc, fonts, locked dependencies) and runs offline and read-only, with no Python on your machine. There is no published image yet, so build it once from a clone, then put any command from above after the image name:
 
 ```bash
+podman build -t reportspec .
 podman run --rm reportspec conformance conformance
 ```
 
-To render your own files, mount a folder and write the output there:
+[Running in a container](docs/container.md) covers the build arguments (Fedora and Python versions), Docker, rendering your own files, file ownership on Linux, OpenShift, and what is inside the image.
 
-```bash
-mkdir -p work && cp my.report.md results.jsonl work/
-podman run --rm --network none --read-only --tmpfs /tmp -v "$PWD/work:/work:Z" reportspec \
-  render /work/my.report.md --input /work/results.jsonl --format pdf -o /work/report.pdf
-```
-
-[Running in a container](docs/container.md) has the details: Docker and Linux file ownership, the build arguments, OpenShift, and what is inside the image.
-
-### As an HTTP service (optional)
+### HTTP service (optional)
 
 A standalone, stateless render service for programs that would rather call an API than run a command. It is not tied to EvalHub, ASAGO or any other product, and nothing else needs it. Install the extra and start it:
 
@@ -80,15 +75,7 @@ pip install "reportspec[service] @ git+https://github.com/williamcaban/reportspe
 reportspec serve --playground          # http://127.0.0.1:8000, API docs at /docs, playground at /
 ```
 
-Or in the container: `podman run --rm -p 8000:8000 reportspec serve --host 0.0.0.0 --playground`. Send a template and results as JSON and get the report back:
-
-```bash
-jq -n --rawfile spec examples/quickstart.report.md --rawfile data examples/inputs/quickstart.jsonl \
-  '{spec: $spec, inputs: [{content: $data, adapter: "jsonl"}], format: "pdf"}' |
-  curl -s -X POST http://127.0.0.1:8000/v1/render -H 'Content-Type: application/json' --data @- -o report.pdf
-```
-
-The [playground](docs/service.md#the-playground) is a web page for trying a template without writing any code. [Render service](docs/service.md) has the endpoints, errors, limits and security notes.
+[Render service](docs/service.md) has the endpoints, a `curl` example, the web playground, errors, limits and security notes. The container image includes the service too.
 
 ## Example output
 
@@ -151,4 +138,8 @@ Charts, tables and cards are drawn only from resolved data. Pass/fail marks come
 
 ## License
 
-Apache-2.0 (see [LICENSE](LICENSE)). The fonts in `src/reportspec/fonts/` (SIL OFL 1.1) and the icons in `src/reportspec/icons/` (CC BY 4.0) keep their own licenses; [NOTICE](NOTICE) lists them with the provenance of the example inputs.
+- **Code:** Apache-2.0, see [LICENSE](LICENSE).
+- **Fonts** (`src/reportspec/fonts/`): Red Hat Text and Mono, SIL OFL 1.1, redistributed unmodified.
+- **Icons** (`src/reportspec/icons/`): Font Awesome Free status icons, CC BY 4.0.
+- **Example inputs:** some are derived from third-party projects and taxonomies.
+- [NOTICE](NOTICE) lists the fonts, icons and example-input provenance with their licenses.
