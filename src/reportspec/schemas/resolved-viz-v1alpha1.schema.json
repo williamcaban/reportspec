@@ -8,7 +8,7 @@
   "additionalProperties": false,
   "properties": {
     "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,62}$" },
-    "type": { "enum": ["bar", "line", "heatmap", "radar", "radial", "boxplot"] },
+    "type": { "enum": ["bar", "line", "heatmap", "radar", "radial", "boxplot", "graph", "bundle", "parallel"] },
     "title": { "type": "string", "maxLength": 200 },
     "caption": { "type": ["string", "null"], "maxLength": 1000 },
     "alt": { "type": ["string", "null"], "maxLength": 1000, "description": "Author-supplied accessible text. Generated from the data when null (VQA-9)." },
@@ -27,7 +27,8 @@
         "midpoint": { "type": ["number", "null"] },
         "show_values": { "type": "boolean" },
         "x_label": { "type": "string" },
-        "y_label": { "type": "string" }
+        "y_label": { "type": "string" },
+        "tension": { "type": "number", "minimum": 0, "maximum": 1 }
       },
       "additionalProperties": false
     },
@@ -77,6 +78,80 @@
         }
       }
     },
+    "graph": {
+      "type": "object",
+      "description": "graph (force-directed) and bundle (edge bundling). Nodes and links, already resolved from the bindings. A link whose end is missing, that joins a node to itself, or (bundle only) that names an unknown node is not listed; `skipped_links` counts them so the figure can say so.",
+      "required": ["nodes", "links", "directed", "skipped_links", "unresolved_nodes"],
+      "additionalProperties": false,
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "maxItems": 500,
+          "items": {
+            "type": "object",
+            "required": ["id", "label", "group", "resolved"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string" },
+              "label": { "type": "string" },
+              "group": { "type": ["string", "null"] },
+              "resolved": { "type": "boolean", "description": "false when a link names this id but the node list has no such row (graph only; drawn hollow)" }
+            }
+          }
+        },
+        "links": {
+          "type": "array",
+          "maxItems": 2000,
+          "items": {
+            "type": "object",
+            "required": ["source", "target"],
+            "additionalProperties": false,
+            "properties": { "source": { "type": "string" }, "target": { "type": "string" } }
+          }
+        },
+        "directed": { "type": "boolean" },
+        "skipped_links": { "type": "integer", "minimum": 0 },
+        "unresolved_nodes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "parallel": {
+      "type": "object",
+      "description": "parallel coordinates. One polyline per series across the axes, each axis on its own scale. A null value is N/A: the line breaks there and is never drawn through zero.",
+      "required": ["axes", "series"],
+      "additionalProperties": false,
+      "properties": {
+        "axes": {
+          "type": "array",
+          "maxItems": 50,
+          "items": {
+            "type": "object",
+            "required": ["field", "label", "lower_is_better", "display", "precision"],
+            "additionalProperties": false,
+            "properties": {
+              "field": { "type": "string" },
+              "label": { "type": "string" },
+              "lower_is_better": { "type": "boolean" },
+              "display": { "type": ["string", "null"] },
+              "precision": { "type": ["integer", "null"], "minimum": 0, "maximum": 6 }
+            }
+          }
+        },
+        "series": {
+          "type": "array",
+          "maxItems": 500,
+          "items": {
+            "type": "object",
+            "required": ["label", "values", "texts"],
+            "additionalProperties": false,
+            "properties": {
+              "label": { "type": "string" },
+              "values": { "type": "array", "items": { "type": ["number", "null"] }, "description": "One per axis, in axis order." },
+              "texts": { "type": "array", "items": { "type": "string" }, "description": "Formatted values, or N/A, in axis order." }
+            }
+          }
+        }
+      }
+    },
     "samples": {
       "type": "array",
       "maxItems": 10000,
@@ -92,6 +167,8 @@
   "allOf": [
     { "if": { "properties": { "type": { "enum": ["bar", "line", "radar", "radial"] } } }, "then": { "required": ["points"] } },
     { "if": { "properties": { "type": { "const": "heatmap" } } }, "then": { "required": ["matrix"] } },
-    { "if": { "properties": { "type": { "const": "boxplot" } } }, "then": { "required": ["samples"] } }
+    { "if": { "properties": { "type": { "const": "boxplot" } } }, "then": { "required": ["samples"] } },
+    { "if": { "properties": { "type": { "enum": ["graph", "bundle"] } } }, "then": { "required": ["graph"] } },
+    { "if": { "properties": { "type": { "const": "parallel" } } }, "then": { "required": ["parallel"] } }
   ]
 }

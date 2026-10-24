@@ -1,0 +1,10 @@
+description: "parallel coordinates read one row per line; an N/A value stays N/A in the Markdown fallback"
+inputs:
+- ../inputs/network.jsonl
+expect:
+  validate: valid
+  render: ok
+  markdown_contains:
+  - '| Config | Utility | Asr (lower is better) | Latency (lower is better) |'
+  - '| A | 90% | 30% | 4.0 |'
+  - '| B | 80% | 10% | N/A |'

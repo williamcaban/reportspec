@@ -1,0 +1,7 @@
+description: "a bundle has no hierarchy without a nodes binding"
+inputs:
+- ../inputs/network.jsonl
+expect:
+  validate: invalid
+  errors_contain:
+  - "'nodes' is a required property"

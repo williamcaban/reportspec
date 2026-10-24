@@ -26,7 +26,7 @@ Check it:
 
 ```bash
 podman run --rm reportspec --version
-podman run --rm reportspec conformance conformance      # 34/34 cases
+podman run --rm reportspec conformance conformance      # 46/46 cases
 ```
 
 ## Run the examples

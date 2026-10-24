@@ -1,0 +1,8 @@
+description: "a link with a missing end, and a link to an unknown node, are not hidden: the unknown node is listed as not in the node list and the unusable link is counted"
+inputs:
+- ../inputs/network.jsonl
+expect:
+  render: ok
+  markdown_contains:
+  - '1 link(s) not listed'
+  - '1 node(s) named by a link are not in the node list'

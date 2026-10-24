@@ -4,7 +4,9 @@ The seam with the rest of the implementation is the payload (src/reportspec/sche
 Nothing here sees bindings, templates or hosts, so EvalHub and ASAGO can share it.
 
   bar, line, heatmap, boxplot  Altair builds a Vega-Lite spec
-  radar, radial                a Vega spec with the geometry computed here
+  radar, radial, bundle,       a Vega spec with the geometry computed here
+  parallel
+  graph                        a Vega spec; Vega's own force transform does the layout (deterministic: same input, same SVG)
 
 Every render goes through vl-convert with allowed_base_urls=[]: a spec can never fetch anything.
 N/A (a null value) is never drawn as zero; it is labelled "N/A" in every chart (VISUAL-QA.md, VQA-3).
@@ -32,6 +34,12 @@ BOX_FILL = "#BEE1F4"
 VEGA_LITE = "6.4"  # must be in vl_convert.get_vegalite_versions()
 RADAR_AXES = (3, 12)
 RADIAL_MAX = 8
+GRAPH_MAX = (80, 200)  # nodes, links
+BUNDLE_MAX = (120, 400)
+PARALLEL_MAX = 8  # series: one palette color each
+# Categorical colors for groups and series. No red or green: those mean FAIL and PASS everywhere else in a report.
+CATEGORY = ["#0066CC", "#F0AB00", "#009596", "#5752D1", "#EC7A08", "#6A6E73", "#73BCF7", "#8A4B00"]
+SHAPES = ["circle", "square", "diamond", "triangle-up", "cross", "triangle-down", "triangle-left", "triangle-right"]  # a second cue besides color
 LABEL_LIMIT = 150
 
 
@@ -55,6 +63,10 @@ def _na_count(p: dict[str, Any]) -> int:
         return sum(1 for r in p["matrix"]["rows"] for c in r["cells"] if c["value"] is None)
     if t == "boxplot":
         return sum(1 for s in p["samples"] if s["y"] is None)
+    if t == "parallel":
+        return sum(1 for sr in p["parallel"]["series"] for v in sr["values"] if v is None)
+    if t in ("graph", "bundle"):
+        return 0
     return sum(1 for q in p["points"] if q["value"] is None)
 
 
@@ -110,7 +122,34 @@ def _short(s: str, n: int = 24) -> str:
     return s if len(s) <= n else s[: n - 1] + "…"
 
 
+def _note_network(p: dict[str, Any]) -> str:
+    t = p["type"]
+    if t == "parallel":
+        parts = ["Each axis has its own scale, shown at both ends."]
+        if any(a["lower_is_better"] for a in p["parallel"]["axes"]):
+            parts.append("Axes marked lower is better are flipped: up is always better.")
+        n_na = _na_count(p)
+        if n_na:
+            parts.append(f"N/A: {n_na} value{'s' if n_na != 1 else ''} not available; the line breaks there and is not drawn through zero.")
+        return " ".join(parts)
+    g = p["graph"]
+    parts = [f"{len(g['nodes'])} nodes, {len(g['links'])} links."]
+    if t == "graph" and g["directed"]:
+        parts.append("Arrows point to the target.")
+    if t == "graph":
+        parts.append("Layout is computed from the links; position carries no meaning.")
+    if g["unresolved_nodes"]:
+        n = g["unresolved_nodes"]
+        parts.append(f"Hollow: {n} node{'s' if n != 1 else ''} named by a link but missing from the node list.")
+    if g["skipped_links"]:
+        n = g["skipped_links"]
+        parts.append(f"Not drawn: {n} link{'s' if n != 1 else ''} with a missing end, the same node at both ends, or an unknown node.")
+    return " ".join(parts)
+
+
 def _note(p: dict[str, Any]) -> str:
+    if p["type"] in ("graph", "bundle", "parallel"):
+        return _note_network(p)
     parts: list[str] = []
     thr = p.get("threshold")
     if thr is not None:
@@ -142,6 +181,19 @@ def _describe(p: dict[str, Any]) -> str:
             out.append(f"{g}: n={len(ys)}, median {_fmt(statistics.median(ys), p)}, min {_fmt(min(ys), p)}, max {_fmt(max(ys), p)}"
                        if ys else f"{g}: no values")
         return f"Box plot, {head}. " + "; ".join(out) + "."
+    if t in ("graph", "bundle"):
+        g = p["graph"]
+        lab = {n["id"]: n["label"] for n in g["nodes"]}
+        links = "; ".join(f"{lab[x['source']]} to {lab[x['target']]}" for x in g["links"][:40])
+        more = f"; and {len(g['links']) - 40} more" if len(g["links"]) > 40 else ""
+        kind = "Force-directed graph" if t == "graph" else "Edge bundling diagram"
+        groups = _group_order(g["nodes"])
+        grp = f" Groups: {', '.join(groups)}." if groups else ""
+        return f"{kind}, {head}. {len(g['nodes'])} nodes and {len(g['links'])} links.{grp} Links: {links or 'none'}{more}."[:2000]
+    if t == "parallel":
+        ax = p["parallel"]["axes"]
+        rows = "; ".join(f"{sr['label']}: " + ", ".join(f"{a['label']} {x}" for a, x in zip(ax, sr["texts"], strict=True)) for sr in p["parallel"]["series"])
+        return f"Parallel coordinates, {head}. Axes: {', '.join(a['label'] for a in ax)}. {rows}."[:2000]
     kind = {"bar": "Bar chart", "line": "Line chart", "radar": "Radar chart", "radial": "Radial bar chart"}[t]
     vals = ", ".join(f"{q['label']} {q['text']}" for q in p["points"])
     thr = f" Threshold {_fmt(p['threshold'], p)}." if p.get("threshold") is not None else ""
@@ -169,7 +221,10 @@ def _vl_svg(chart: alt.TopLevelMixin) -> str:
 
 
 def _vega_svg(spec: dict[str, Any]) -> str:
-    return vlc.vega_to_svg(spec, allowed_base_urls=[])
+    try:
+        return vlc.vega_to_svg(spec, allowed_base_urls=[])
+    except ValueError as e:  # vl-convert reports Vega failures as ValueError with a JavaScript stack
+        raise ChartError("the chart could not be drawn: " + str(e).splitlines()[1 if len(str(e).splitlines()) > 1 else 0][:160]) from e
 
 
 def _placeholder(p: dict[str, Any], reason: str) -> Figure:
@@ -460,10 +515,277 @@ def _radial(p: dict[str, Any]) -> str:
     return _vega_svg(spec)
 
 
+# --- Network and multi-axis types: graph, bundle, parallel -----------------------------------------------
+
+
+def _group_order(nodes: list[dict[str, Any]]) -> list[str]:
+    seen: list[str] = []
+    for n in nodes:
+        if n["group"] is not None and n["group"] not in seen:
+            seen.append(n["group"])
+    return seen
+
+
+def _legend(entries: list[dict[str, Any]], width: float, y0: float) -> tuple[list[dict[str, Any]], list[dict[str, Any]], float]:
+    """A legend laid out here, row by row. Vega would place its own outside the frame and lose it from the SVG bounds."""
+    syms: list[dict[str, Any]] = []
+    texts: list[dict[str, Any]] = []
+    x, y, row = 6.0, y0, 18.0
+    for e in entries:
+        label = _short(e["label"], 30)
+        w = 20 + 6.3 * len(label) + 16
+        if x + w > width and x > 6.0:
+            x, y = 6.0, y + row
+        hollow = e.get("hollow", False)
+        syms.append({"x": x + 6, "y": y, "shape": e["shape"], "fill": "#FFFFFF" if hollow else e["color"],
+                     "stroke": e["color"] if hollow else "#FFFFFF", "dash": [3, 2] if hollow else [1, 0]})
+        texts.append({"x": x + 17, "y": y, "text": label, "color": INK})
+        x += w
+    return syms, texts, (y - y0) + row
+
+
+def _legend_marks() -> list[dict[str, Any]]:
+    return [
+        {"type": "symbol", "from": {"data": "legend_sym"}, "encode": {"enter": {
+            "x": {"field": "x"}, "y": {"field": "y"}, "shape": {"field": "shape"}, "size": {"value": 90}, "fill": {"field": "fill"},
+            "stroke": {"field": "stroke"}, "strokeWidth": {"value": 1.5}, "strokeDash": {"field": "dash"}}}},
+        _text_mark("legend_txt", x={"field": "x"}, y={"field": "y"}, text={"field": "text"}, fontSize={"value": 10}, baseline={"value": "middle"}, align={"value": "left"}),
+    ]
+
+
+def _group_legend(groups: list[str], extra: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
+    return [{"label": name, "color": CATEGORY[i], "shape": SHAPES[i]} for i, name in enumerate(groups)] + (extra or [])
+
+
+def _check_groups(kind: str, groups: list[str]) -> None:
+    if len(groups) > len(CATEGORY):
+        raise ChartError(f"{kind} supports up to {len(CATEGORY)} groups, got {len(groups)}; merge groups or filter the records")
+
+
+def _data(**sets: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [{"name": k, "values": v} for k, v in sets.items()]
+
+
+def _force_layout(n: int, links: list[tuple[int, int]], w: float, h: float) -> list[tuple[float, float]]:
+    """Positions from Vega's force transform (d3-force: deterministic, no random seed). The simulation runs once, to completion
+    (static), and the node positions are read back from the scenegraph, so the drawing can be fitted to the frame afterwards:
+    a force layout has no bounds of its own and spills far outside the frame from about 25 nodes."""
+    spec = {"$schema": "https://vega.github.io/schema/vega/v5.json", "width": w, "height": h, "padding": 0, "autosize": "none",
+            "data": _data(nodes_in=[{"cx": w / 2, "cy": h / 2} for _ in range(n)], links=[{"source": a, "target": b} for a, b in links]),
+            "marks": [{"name": "nodes", "type": "symbol", "from": {"data": "nodes_in"}, "transform": [{
+                "type": "force", "iterations": 300, "static": True, "forces": [
+                    {"force": "center", "x": w / 2, "y": h / 2}, {"force": "x", "x": "datum.cx", "strength": 0.08}, {"force": "y", "y": "datum.cy", "strength": 0.12},
+                    {"force": "collide", "radius": 34}, {"force": "nbody", "strength": -520}, {"force": "link", "links": "links", "distance": 105}]}]}]}
+    try:
+        graph = vlc.vega_to_scenegraph(spec, allowed_base_urls=[])
+    except ValueError as e:
+        raise ChartError("the graph layout failed: " + str(e).splitlines()[-1][:160]) from e
+    stack = [graph]
+    while stack:
+        o = stack.pop()
+        if isinstance(o, dict):
+            if o.get("name") == "nodes" and "items" in o:
+                pts = [(float(it["x"]), float(it["y"])) for it in o["items"]]
+                if len(pts) == n and all(math.isfinite(x) and math.isfinite(y) for x, y in pts):
+                    return pts
+                raise ChartError("the graph layout did not converge")
+            stack += [v for v in o.values() if isinstance(v, dict | list)]
+        elif isinstance(o, list):
+            stack += [v for v in o if isinstance(v, dict | list)]
+    raise ChartError("the graph layout produced no nodes")
+
+
+def _graph(p: dict[str, Any]) -> str:
+    g = p["graph"]
+    nodes, links = g["nodes"], g["links"]
+    if len(nodes) > GRAPH_MAX[0] or len(links) > GRAPH_MAX[1]:
+        raise ChartError(f"graph supports up to {GRAPH_MAX[0]} nodes and {GRAPH_MAX[1]} links, got {len(nodes)} and {len(links)}; filter the records or use a table")
+    groups = _group_order(nodes)
+    _check_groups("graph", groups)
+    gi = {name: i for i, name in enumerate(groups)}
+    index = {n["id"]: i for i, n in enumerate(nodes)}
+    W, H, LABEL = 680, 420, 170
+    raw = _force_layout(len(nodes), [(index[x["source"]], index[x["target"]]) for x in links], W, H)
+    xs, ys = [x for x, _ in raw], [y for _, y in raw]
+    x0, y0 = min(xs), min(ys)
+    bw, bh = max(max(xs) - x0, 1.0), max(max(ys) - y0, 1.0)
+    pad_l, pad_t, avail_w, avail_h = 24.0, 20.0, W - 24.0 - LABEL, H - 40.0
+    k = min(avail_w / bw, avail_h / bh, 1.5)  # one scale for both axes: distances keep their meaning
+    ox, oy = pad_l + (avail_w - bw * k) / 2, pad_t + (avail_h - bh * k) / 2
+    pos = [(ox + (x - x0) * k, oy + (y - y0) * k) for x, y in raw]
+    small = len(nodes) > 30
+    rows = []
+    for n, (x, y) in zip(nodes, pos, strict=True):
+        i = gi.get(n["group"], 0)
+        color = CATEGORY[i] if n["resolved"] else NA_TEXT
+        rows.append({"x": x, "y": y, "label": _short(n["label"], 30), "shape": SHAPES[i], "fill": color if n["resolved"] else "#FFFFFF",
+                     "stroke": "#FFFFFF" if n["resolved"] else color, "sw": 1.2 if n["resolved"] else 1.8, "dash": [1, 0] if n["resolved"] else [3, 2]})
+    lines, wings = [], []
+    wc, ws = math.cos(math.radians(26)), math.sin(math.radians(26))
+    for ln in links:
+        (sx, sy), (tx, ty) = pos[index[ln["source"]]], pos[index[ln["target"]]]
+        d = math.hypot(tx - sx, ty - sy)
+        if not g["directed"] or d < 26:
+            lines.append({"x": sx, "y": sy, "x2": tx, "y2": ty})
+            continue
+        ux, uy = (tx - sx) / d, (ty - sy) / d
+        px, py = tx - 12 * ux, ty - 12 * uy  # the arrow tip, just outside the target node
+        lines.append({"x": sx, "y": sy, "x2": px, "y2": py})
+        for sg in (1, -1):
+            wings.append({"x": px, "y": py, "x2": px - 8 * (ux * wc - sg * ws * uy), "y2": py - 8 * (sg * ws * ux + uy * wc)})
+    extra = [{"label": "not in node list", "color": NA_TEXT, "shape": "circle", "hollow": True}] if g["unresolved_nodes"] else []
+    entries = _group_legend(groups, extra)
+    syms, texts, lh = _legend(entries, W, H + 12) if entries else ([], [], 0.0)
+    rule = lambda data, color, width, **kw: {"type": "rule", "from": {"data": data}, "interactive": False, "encode": {"enter": {  # noqa: E731
+        "x": {"field": "x"}, "y": {"field": "y"}, "x2": {"field": "x2"}, "y2": {"field": "y2"}, "stroke": {"value": color}, "strokeWidth": {"value": width}, **kw}}}
+    marks: list[dict[str, Any]] = [
+        rule("lines", "#8A8D90", 1.4),
+        *([rule("wings", "#6A6E73", 1.8, strokeCap={"value": "round"})] if wings else []),
+        {"type": "symbol", "from": {"data": "nodes"}, "encode": {"enter": {
+            "x": {"field": "x"}, "y": {"field": "y"}, "size": {"value": 140 if small else 280}, "shape": {"field": "shape"}, "fill": {"field": "fill"},
+            "stroke": {"field": "stroke"}, "strokeWidth": {"field": "sw"}, "strokeDash": {"field": "dash"}}}},
+        _text_mark("nodes", x={"field": "x"}, y={"field": "y"}, text={"field": "label"}, fontSize={"value": 9 if small else 10}, dx={"value": 9 if small else 11},
+                   baseline={"value": "middle"}, fill={"value": INK}, limit={"value": LABEL}),
+        *(_legend_marks() if entries else []),
+    ]
+    spec = {"$schema": "https://vega.github.io/schema/vega/v5.json", "width": W, "height": H + 12 + lh, "padding": 6, "autosize": "none",
+            "data": _data(nodes=rows, lines=lines, wings=wings, legend_sym=syms, legend_txt=texts), "marks": marks}
+    return _vega_svg(spec)
+
+
+def _bundle(p: dict[str, Any]) -> str:
+    """Hierarchical edge bundling: nodes on a circle, grouped; each link is pulled through its group nodes and the center."""
+    g, tension = p["graph"], p["options"].get("tension", 0.85)
+    nodes, links = g["nodes"], g["links"]
+    if len(nodes) > BUNDLE_MAX[0] or len(links) > BUNDLE_MAX[1]:
+        raise ChartError(f"bundle supports up to {BUNDLE_MAX[0]} nodes and {BUNDLE_MAX[1]} links, got {len(nodes)} and {len(links)}; filter the records or use a heatmap")
+    groups = _group_order(nodes)
+    _check_groups("bundle", groups)
+    gi = {name: i for i, name in enumerate(groups)}
+    R, M = 150, 135
+    cx = cy = R + M
+    ordered = [n for name in groups for n in nodes if n["group"] == name]
+    total = len(ordered) + len(groups)  # one empty slot between groups
+    pos: dict[str, tuple[float, float, float]] = {}
+    grp_angles: dict[str, list[float]] = {name: [] for name in groups}
+    slot = 0
+    for name in groups:
+        for n in ordered:
+            if n["group"] != name:
+                continue
+            a = 2 * math.pi * slot / total - math.pi / 2
+            pos[n["id"]] = (cx + R * math.cos(a), cy + R * math.sin(a), a)
+            grp_angles[name].append(a)
+            slot += 1
+        slot += 1
+    ring = {name: (cx + 0.45 * R * math.cos(sum(a) / len(a)), cy + 0.45 * R * math.sin(sum(a) / len(a))) for name, a in grp_angles.items()}
+    group_of = {n["id"]: n["group"] for n in nodes}
+    paths = []
+    for k, ln in enumerate(links):
+        gs, gt = group_of[ln["source"]], group_of[ln["target"]]
+        pts = [pos[ln["source"]][:2], ring[gs], *([(cx, cy)] if gs != gt else []), *([ring[gt]] if gs != gt else []), pos[ln["target"]][:2]]
+        if gs == gt:
+            pts = [pos[ln["source"]][:2], ring[gs], pos[ln["target"]][:2]]
+        paths += [{"seg": k, "x": x, "y": y, "color": CATEGORY[gi[gs]]} for x, y in pts]
+    dots = [{"x": pos[n["id"]][0], "y": pos[n["id"]][1], "shape": SHAPES[gi[n["group"]]], "color": CATEGORY[gi[n["group"]]]} for n in nodes]
+    labels = []
+    for n in nodes:
+        x, y, a = pos[n["id"]]
+        right = math.cos(a) >= 0
+        labels.append({"x": cx + (R + 12) * math.cos(a), "y": cy + (R + 12) * math.sin(a), "text": _short(n["label"], 24), "color": INK,
+                       "angle": math.degrees(a) + (0 if right else 180), "align": "left" if right else "right"})
+    syms, texts, lh = _legend(_group_legend(groups), 2 * cx, 2 * cy + 6)
+    marks: list[dict[str, Any]] = [
+        {"type": "group", "from": {"facet": {"data": "paths", "name": "seg", "groupby": "seg"}}, "marks": [
+            {"type": "line", "from": {"data": "seg"}, "interactive": False, "encode": {"update": {
+                "x": {"field": "x"}, "y": {"field": "y"}, "stroke": {"field": "color"}, "strokeWidth": {"value": 1.5}, "strokeOpacity": {"value": 0.55},
+                "interpolate": {"value": "bundle"}, "tension": {"value": tension}}}}]},
+        {"type": "symbol", "from": {"data": "dots"}, "encode": {"enter": {
+            "x": {"field": "x"}, "y": {"field": "y"}, "shape": {"field": "shape"}, "size": {"value": 90}, "fill": {"field": "color"},
+            "stroke": {"value": "#FFFFFF"}, "strokeWidth": {"value": 1}}}},
+        _text_mark("labels", x={"field": "x"}, y={"field": "y"}, text={"field": "text"}, fontSize={"value": 10}, align={"field": "align"},
+                   baseline={"value": "middle"}, angle={"field": "angle"}),
+        *_legend_marks(),
+    ]
+    spec = {"$schema": "https://vega.github.io/schema/vega/v5.json", "width": 2 * cx, "height": 2 * cy + 6 + lh, "padding": 6, "autosize": "none",
+            "data": _data(paths=paths, dots=dots, labels=labels, legend_sym=syms, legend_txt=texts), "marks": marks}
+    return _vega_svg(spec)
+
+
+def _parallel(p: dict[str, Any]) -> str:
+    pl = p["parallel"]
+    axes, series = pl["axes"], pl["series"]
+    if len(series) > PARALLEL_MAX:
+        raise ChartError(f"parallel supports up to {PARALLEL_MAX} series, got {len(series)}; filter the records or use a heatmap")
+    n = len(axes)
+    W = int(max(440, min(760, 130 * (n - 1) + 130)))
+    X0, X1, Y0, Y1 = 65, W - 65, 74, 274
+    xs = [X0 + i * (X1 - X0) / (n - 1) for i in range(n)]
+    rng = p.get("range")
+    doms: list[tuple[float, float]] = []
+    for i in range(n):
+        vals = [sr["values"][i] for sr in series if sr["values"][i] is not None]
+        lo, hi = (float(rng[0]), float(rng[1])) if rng else ((min(vals), max(vals)) if vals else (0.0, 1.0))
+        if hi == lo:
+            pad = abs(lo) * 0.5 or 0.5
+            lo, hi = lo - pad, hi + pad
+        doms.append((lo, hi))
+
+    def y_of(i: int, v: float) -> float:
+        lo, hi = doms[i]
+        f = (v - lo) / (hi - lo)
+        return Y0 + f * (Y1 - Y0) if axes[i]["lower_is_better"] else Y1 - f * (Y1 - Y0)
+
+    rules, titles, ticks, nas, segs, pts = [], [], [], [], [], []
+    for i, a in enumerate(axes):
+        f = {"display": a["display"], "precision": a["precision"]}
+        lo, hi = doms[i]
+        top, bottom = (lo, hi) if a["lower_is_better"] else (hi, lo)
+        rules.append({"x": xs[i], "y": Y0, "y2": Y1})
+        titles.append({"x": xs[i], "y": Y0 - 42, "text": _short(a["label"], 20), "color": INK, "weight": "bold"})
+        if a["lower_is_better"]:
+            titles.append({"x": xs[i], "y": Y0 - 29, "text": "lower is better", "color": MUTED, "weight": "normal"})
+        ticks += [{"x": xs[i], "y": Y0 - 12, "text": _fmt(top, f), "color": MUTED}, {"x": xs[i], "y": Y1 + 14, "text": _fmt(bottom, f), "color": MUTED}]
+        gone = [sr["label"] for sr in series if sr["values"][i] is None]
+        if gone:
+            nas.append({"x": xs[i], "y": Y1 + 32, "text": "N/A: " + _short(", ".join(gone), 18), "color": NA_TEXT})
+    for si, sr in enumerate(series):
+        run: list[tuple[float, float]] = []
+        runs: list[list[tuple[float, float]]] = []
+        for i, v in enumerate(sr["values"]):
+            if v is None:
+                if run:
+                    runs.append(run)
+                run = []
+            else:
+                run.append((xs[i], y_of(i, v)))
+                pts.append({"x": xs[i], "y": y_of(i, v), "color": CATEGORY[si]})
+        if run:
+            runs.append(run)
+        segs += [{"seg": f"{si}-{k}", "x": x, "y": y, "color": CATEGORY[si]} for k, r in enumerate(runs) if len(r) > 1 for x, y in r]
+    syms, texts, lh = _legend([{"label": sr["label"], "color": CATEGORY[i], "shape": "circle"} for i, sr in enumerate(series)], W, Y1 + 52)
+    marks: list[dict[str, Any]] = [
+        {"type": "rule", "from": {"data": "rules"}, "encode": {"enter": {"x": {"field": "x"}, "y": {"field": "y"}, "y2": {"field": "y2"}, "stroke": {"value": MUTED}, "strokeWidth": {"value": 1.5}}}},
+        {"type": "group", "from": {"facet": {"data": "segs", "name": "seg", "groupby": "seg"}}, "marks": [
+            {"type": "line", "from": {"data": "seg"}, "interactive": False, "encode": {"enter": {
+                "x": {"field": "x"}, "y": {"field": "y"}, "stroke": {"field": "color"}, "strokeWidth": {"value": 2.4}, "strokeOpacity": {"value": 0.9}, "interpolate": {"value": "linear"}}}}]},
+        {"type": "symbol", "from": {"data": "pts"}, "encode": {"enter": {
+            "x": {"field": "x"}, "y": {"field": "y"}, "size": {"value": 60}, "fill": {"field": "color"}, "stroke": {"value": "#FFFFFF"}, "strokeWidth": {"value": 1}}}},
+        _text_mark("titles", x={"field": "x"}, y={"field": "y"}, text={"field": "text"}, align={"value": "center"}, baseline={"value": "middle"}, fontWeight={"field": "weight"}),
+        _text_mark("ticks", x={"field": "x"}, y={"field": "y"}, text={"field": "text"}, align={"value": "center"}, baseline={"value": "middle"}, fontSize={"value": 10}),
+        _text_mark("nas", x={"field": "x"}, y={"field": "y"}, text={"field": "text"}, align={"value": "center"}, baseline={"value": "middle"}, fontSize={"value": 10}, fontStyle={"value": "italic"}),
+        *_legend_marks(),
+    ]
+    spec = {"$schema": "https://vega.github.io/schema/vega/v5.json", "width": W, "height": Y1 + 52 + lh, "padding": 6, "autosize": "none",
+            "data": _data(rules=rules, segs=segs, pts=pts, titles=titles, ticks=ticks, nas=nas, legend_sym=syms, legend_txt=texts), "marks": marks}
+    return _vega_svg(spec)
+
+
 # --- Entry point ---------------------------------------------------------------------------------------
 
 
-_RENDERERS = {"bar": _bar, "line": _line, "heatmap": _heatmap, "boxplot": _boxplot, "radar": _radar, "radial": _radial}
+_RENDERERS = {"bar": _bar, "line": _line, "heatmap": _heatmap, "boxplot": _boxplot, "radar": _radar, "radial": _radial,
+              "graph": _graph, "bundle": _bundle, "parallel": _parallel}
 
 
 def render_payload(p: dict[str, Any]) -> Figure:
@@ -475,9 +797,17 @@ def render_payload(p: dict[str, Any]) -> Figure:
         return _placeholder(p, "No data available")
     if t == "boxplot" and not any(s["y"] is not None for s in p["samples"]):
         return _placeholder(p, "No data available" if not p["samples"] else "All values are N/A")
-    if t not in ("heatmap", "boxplot") and not p["points"]:
+    if t in ("graph", "bundle") and not p["graph"]["nodes"]:
         return _placeholder(p, "No data available")
-    if t not in ("heatmap", "boxplot") and all(q["value"] is None for q in p["points"]):
+    if t in ("graph", "bundle") and not p["graph"]["links"]:
+        return _placeholder(p, "No links to draw" + (f": {p['graph']['skipped_links']} not drawable" if p["graph"]["skipped_links"] else ""))
+    if t == "parallel" and not p["parallel"]["series"]:
+        return _placeholder(p, "No data available")
+    if t == "parallel" and all(v is None for sr in p["parallel"]["series"] for v in sr["values"]):
+        return _placeholder(p, "All values are N/A")
+    if t not in ("heatmap", "boxplot", "graph", "bundle", "parallel") and not p["points"]:
+        return _placeholder(p, "No data available")
+    if t not in ("heatmap", "boxplot", "graph", "bundle", "parallel") and all(q["value"] is None for q in p["points"]):
         return _placeholder(p, "All values are N/A")
     alt_text = p.get("alt") or _describe(p)
     return Figure(_RENDERERS[t](p), alt_text, _note(p))

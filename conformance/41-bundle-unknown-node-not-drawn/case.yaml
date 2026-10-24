@@ -1,0 +1,10 @@
+description: "a bundle cannot place a node that is not in the node list, so the link is not drawn, and the Markdown says so"
+inputs:
+- ../inputs/network.jsonl
+expect:
+  render: ok
+  markdown_contains:
+  - '2 link(s) not listed'
+  - '| Alpha | x | Beta | x |'
+  markdown_excludes:
+  - 'zz'

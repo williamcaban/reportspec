@@ -202,7 +202,10 @@
             "table",
             "summary_cards",
             "boxplot",
-            "radial"
+            "radial",
+            "graph",
+            "bundle",
+            "parallel"
           ]
         }
       },
@@ -301,6 +304,42 @@
           },
           "then": {
             "$ref": "#/$defs/vizRadial"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "graph"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/vizGraph"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "bundle"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/vizBundle"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "parallel"
+              }
+            }
+          },
+          "then": {
+            "$ref": "#/$defs/vizParallel"
           }
         }
       ]
@@ -1134,6 +1173,140 @@
             "desc"
           ],
           "default": "none"
+        }
+      }
+    },
+    "vizGraph": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/vizCommon"
+        }
+      ],
+      "required": [
+        "id",
+        "type",
+        "data",
+        "source",
+        "target"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "graph"
+        },
+        "data": {
+          "$ref": "#/$defs/identifier",
+          "description": "table binding with one row per link"
+        },
+        "source": {
+          "$ref": "#/$defs/identifier",
+          "description": "table field that holds the id of the node a link starts at"
+        },
+        "target": {
+          "$ref": "#/$defs/identifier",
+          "description": "table field that holds the id of the node a link ends at"
+        },
+        "nodes": {
+          "$ref": "#/$defs/identifier",
+          "description": "optional table binding with one row per node: field `id`, and optionally `label` and `group`. Without it, nodes are taken from the links and labelled by id"
+        },
+        "directed": {
+          "type": "boolean",
+          "default": true,
+          "description": "draw an arrowhead at the target end of each link"
+        }
+      }
+    },
+    "vizBundle": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/vizCommon"
+        }
+      ],
+      "required": [
+        "id",
+        "type",
+        "data",
+        "source",
+        "target",
+        "nodes"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "bundle"
+        },
+        "data": {
+          "$ref": "#/$defs/identifier",
+          "description": "table binding with one row per link"
+        },
+        "source": {
+          "$ref": "#/$defs/identifier",
+          "description": "table field that holds the id of the node a link starts at"
+        },
+        "target": {
+          "$ref": "#/$defs/identifier",
+          "description": "table field that holds the id of the node a link ends at"
+        },
+        "nodes": {
+          "$ref": "#/$defs/identifier",
+          "description": "table binding with one row per node: fields `id` and `group`, and optionally `label`. Nodes are placed on a circle, grouped by `group`, and links are bundled through their groups"
+        },
+        "tension": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.85,
+          "description": "0 draws straight chords, 1 bundles tightly"
+        }
+      }
+    },
+    "vizParallel": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/vizCommon"
+        }
+      ],
+      "required": [
+        "id",
+        "type",
+        "data",
+        "series",
+        "axes"
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "type": {
+          "const": "parallel"
+        },
+        "data": {
+          "$ref": "#/$defs/identifier",
+          "description": "table binding with one row per line"
+        },
+        "series": {
+          "$ref": "#/$defs/identifier",
+          "description": "table field that names each line (one line per row; names must be unique)"
+        },
+        "axes": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 10,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "description": "numeric table fields, left to right. Each axis is scaled to its own range"
+        },
+        "lower_is_better": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/identifier"
+          },
+          "description": "axes where a low value is good; they are drawn flipped so that up is always better"
+        },
+        "range": {
+          "$ref": "#/$defs/range"
         }
       }
     }

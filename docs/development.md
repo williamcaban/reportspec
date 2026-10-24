@@ -7,7 +7,7 @@ git clone https://github.com/williamcaban/reportspec && cd reportspec
 make setup        # creates .venv with the locked dependencies, including the optional service
 make test         # pytest
 make lint         # ruff
-make conformance  # the 34 conformance cases
+make conformance  # the 46 conformance cases
 make serve        # the render service on 127.0.0.1:8000 with the playground
 make clean        # removes .venv and .uv
 ```

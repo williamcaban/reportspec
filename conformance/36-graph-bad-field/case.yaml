@@ -1,0 +1,7 @@
+description: "a graph source field must be a field of its links binding"
+inputs:
+- ../inputs/network.jsonl
+expect:
+  validate: invalid
+  errors_contain:
+  - "source field 'nope' not in binding"

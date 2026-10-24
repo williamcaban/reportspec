@@ -1,0 +1,11 @@
+description: "DOCX carries all three new chart types as images"
+format: docx
+requires: [pandoc]
+inputs:
+- ../inputs/network.jsonl
+expect:
+  render: ok
+  docx_media: 3
+  docx_contains:
+  - 'Figure 1.'
+  - 'Figure 3.'

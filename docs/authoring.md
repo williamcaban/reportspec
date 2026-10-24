@@ -58,12 +58,52 @@ Fenced code blocks with the info string `reportspec-viz`, whose YAML body is val
 | `radar` | series | `range`, `fill`, `threshold`, `direction`. 3 to 12 axes. A missing axis breaks the polygon and is labelled N/A |
 | `radial` | series | `range`, `threshold`, `direction`, `sort`. Radial bars, up to 8 items; N/A leaves an empty track |
 | `boxplot` | table (one row per sample) | `x` (group field), `y` (numeric field), `range`, `threshold`, `direction`, axis labels. Quartiles are computed by the chart; null samples are counted as N/A |
+| `graph` | table of links (one row per link), plus an optional table of nodes | `source`, `target` (link fields), `nodes` (binding with `id`, optional `label` and `group`), `directed` (default true). Force-directed layout, up to 80 nodes and 200 links, 8 groups |
+| `bundle` | table of links, plus a table of nodes (required) | `source`, `target`, `nodes` (binding with `id` and `group`, optional `label`), `tension` (0 to 1, default 0.85). Hierarchical edge bundling, up to 120 nodes and 400 links, 8 groups |
+| `parallel` | table (one row per line) | `series` (field that names each line), `axes` (2 to 10 numeric fields, left to right), `lower_is_better` (axes to flip so up is always better), `range`. Each axis has its own scale. Up to 8 lines; an N/A value breaks the line |
 | `bar` | series | `orientation`, `range`, `threshold`, `direction`, `sort`, `palette`, axis labels |
 | `line` | series (order kept) | `range`, `threshold`, `direction`, axis labels |
 | `heatmap` | matrix | `range`, `palette` (sequential/diverging), `midpoint`, `direction`, `show_values` |
 | `table` | table | `columns[]`, `sort_by`, `status_field` + `status_pass_when` (set `false` for fields where true is bad, like `attack_succeeded`), `sortable` |
 | `summary_cards` | none; each card's `value` is a scalar | `cards[] {label, value, display, precision, threshold, direction}` |
 
-Resolution and drawing are separate. The host resolves a block against the bundle into a [resolved payload](../src/reportspec/schemas/resolved-viz-v1alpha1.schema.json) (plain JSON, values and text already formatted, verdict inputs already evaluated), and a chart renderer turns that payload into SVG. The proof-of-concept renderer builds Vega-Lite specs with Altair for `bar`, `line`, `heatmap` and `boxplot`, and Vega specs for `radar` and `radial`, all rendered through `vl-convert` with external data loading disabled. A host can swap the renderer without touching a template. What a figure must look like is [VISUAL-QA.md](../VISUAL-QA.md). Every chart adds a figure number, a caption note (threshold, direction, N/A count) and generated alt text.
+Resolution and drawing are separate. The host resolves a block against the bundle into a [resolved payload](../src/reportspec/schemas/resolved-viz-v1alpha1.schema.json) (plain JSON, values and text already formatted, verdict inputs already evaluated), and a chart renderer turns that payload into SVG. The proof-of-concept renderer builds Vega-Lite specs with Altair for `bar`, `line`, `heatmap` and `boxplot`, and Vega specs for `radar`, `radial`, `graph`, `bundle` and `parallel`, all rendered through `vl-convert` with external data loading disabled. A host can swap the renderer without touching a template. What a figure must look like is [VISUAL-QA.md](../VISUAL-QA.md). Every chart adds a figure number, a caption note (threshold, direction, N/A count) and generated alt text.
+
+### Networks and parallel coordinates
+
+`graph`, `bundle` and `parallel` read ordinary `table` bindings, so no new binding form is needed. A network is two tables, one row per node and one row per link:
+
+```yaml
+bindings:
+  risk_nodes: { records: coverage/nodes, fields: { id: id, label: name, group: group } }
+  risk_links: { records: coverage/links, fields: { source: from, target: to } }
+```
+
+```reportspec-viz
+id: policy-risk
+type: bundle          # or graph
+data: risk_links
+source: source
+target: target
+nodes: risk_nodes
+```
+
+The matching JSONL is one `set` line per row. `label` and `source` are reserved keys on a JSONL line (the group's display name and its producer), so name your columns something else, as above, and map them in `fields`. A table whose `source` or `label` column "went missing" is this. The charts say so: "No links to draw: 15 not drawable".
+
+| Type | Use it for | How it lays out |
+|---|---|---|
+| `graph` | An attack flow, a dependency map, anything where the shape of the connections matters | Vega's force transform (d3-force) runs once, to completion, and the result is fitted to the frame. The same input gives the same SVG. Position carries no meaning: follow the arrows |
+| `bundle` | Which items on one side relate to which on the other, with many links (policy clauses to risks) | Nodes sit on a circle, grouped by `group`. Each link is pulled through its group nodes and the center, so shared routes read as bands. A node with no curve has no link |
+| `parallel` | One row per candidate measured on several things (agent configurations by utility, attack success, latency) | One vertical axis per field, each scaled to its own range and labelled at both ends. `lower_is_better` axes are flipped, so a line near the top is good on every axis |
+
+What these charts will not do, rather than guess:
+
+- **A link with a missing end, or from a node to itself,** is not drawn. The caption counts them ("Not drawn: 1 link with a missing end, the same node at both ends, or an unknown node"), and so does the Markdown fallback.
+- **A link that names a node the node list lacks** is drawn in a `graph` with a hollow node and a caption line. In a `bundle` it cannot be placed (the node has no group), so the link is not drawn and is counted.
+- **An N/A value in `parallel`** breaks that line at the axis and prints "N/A: name" under it. It is never drawn through zero.
+- **Too much data fails with a message.** More nodes or links than the limits above, more than 8 groups, or more than 8 lines fails the render and says what to filter. Hairballs are not drawn.
+- **Duplicate names fail.** Two nodes with one id, or two `parallel` rows with one series name, stop the render.
+
+`format.markdown.viz: table` renders a network as a list of links with their groups, and `parallel` as a table of values.
 
 Rules: no template syntax inside a fence; no colors (`palette` states intent, the renderer owns colors); thresholds are a literal, `{param: x}` or `{binding: x}`; a block may sit inside `{% if %}` but not inside `{% for %}`; `format.markdown.viz: table` renders each block as a GFM table for CI and PR comments.

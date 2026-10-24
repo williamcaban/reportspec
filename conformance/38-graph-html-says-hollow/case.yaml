@@ -1,0 +1,14 @@
+description: "HTML names the nodes drawn hollow and the links not drawn in the figure caption, and keeps a hostile node label inert"
+format: html
+inputs:
+- ../inputs/network.jsonl
+expect:
+  render: ok
+  html_contains:
+  - 'Hollow: 1 node named by a link but missing from the node list.'
+  - 'Not drawn: 1 link with a missing end'
+  - '&lt;script&gt;alert(1)&lt;/script&gt;'
+  - 'role="img"'
+  html_excludes:
+  - '<script'
+  - '<foreignObject'

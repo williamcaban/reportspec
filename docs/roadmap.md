@@ -8,6 +8,7 @@ ReportSpec is a proof of concept (POC) at v1alpha1: not final, not adopted by Ev
 |---|---|
 | **Render service hardening** | The [standalone render service](service.md) exists as a proof of concept. Still to do: TLS and real authentication (today: a shared bearer token behind your own gateway), rate limiting, load testing, a long-running job mode for large reports, and a published container image |
 | **First release** | A tagged `v0.1.0` and publication on PyPI, so `pip install reportspec` works. Until then, install from GitHub |
+| **More diagram types for attack material** | `graph`, `bundle` and `parallel` exist. Not built: a `tree` chart for attack trees (Vega has tree layouts built in), a layered layout for ordered attack flows (Vega has no layered graph layout, so the adapter would compute positions), import of STIX 2.1 Attack Flow files, and showing Gherkin scenarios. The [ASAGO-ADR-0002 draft](https://github.com/asago-ai/architecture-decision-records/pull/2) review asks for these |
 | **Interactive HTML** | Hover and tooltips in the HTML report with `vega-embed`. PDF and DOCX stay static |
 | **Automated visual QA** | The font audit already runs in CI. Next: golden-image comparison of rendered pages, in a container image pinned by digest. Requirements: [VISUAL-QA.md](../VISUAL-QA.md) |
 | **MLflow adapter** | Read metrics and run history from MLflow ([EvalHub page](hosts/evalhub.md#adapter-mlflow-planned)) |

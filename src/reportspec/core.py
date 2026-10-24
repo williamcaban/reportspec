@@ -63,8 +63,9 @@ FORBIDDEN_NODES = (
     nodes.FilterBlock, nodes.With, nodes.Block, nodes.Call, nodes.AssignBlock,
     nodes.ScopedEvalContextModifier, nodes.EvalContextModifier,
 )
-VIZ_DATA_TYPES = {"radar": "series", "radial": "series", "bar": "series", "line": "series", "heatmap": "matrix", "table": "table", "boxplot": "table"}
-CHART_TYPES = {"bar", "line", "heatmap", "radar", "radial", "boxplot"}  # drawn by charts.py; table and summary_cards are text
+VIZ_DATA_TYPES = {"radar": "series", "radial": "series", "bar": "series", "line": "series", "heatmap": "matrix", "table": "table", "boxplot": "table",
+                  "graph": "table", "bundle": "table", "parallel": "table"}
+CHART_TYPES = {"bar", "line", "heatmap", "radar", "radial", "boxplot", "graph", "bundle", "parallel"}  # drawn by charts.py; table and summary_cards are text
 RESOLVED_SCHEMA = HERE / "schemas" / "resolved-viz-v1alpha1.schema.json"
 NA = "N/A"
 MD_ESCAPE_RE = re.compile(r"([\\`*_\[\]<>|!#])")
@@ -380,6 +381,8 @@ def validate_text(text: str) -> tuple[Report, dict[str, Any], dict[str, Any], st
                 for key in ("x", "y"):
                     if blk[key] not in fields:
                         rep.err(f"{where}: {key} field {blk[key]!r} not in binding {blk['data']!r}")
+            if blk["type"] in ("graph", "bundle", "parallel"):
+                check_network_block(blk, b, bindings, where, rep)
             if blk["type"] == "table":
                 fields = table_fields(b)
                 for col in blk.get("columns", []):
@@ -403,6 +406,38 @@ def validate_text(text: str) -> tuple[Report, dict[str, Any], dict[str, Any], st
     if fm["reportspec"].get("strict") and rep.warnings:
         rep.errors += [f"strict: {w}" for w in rep.warnings]
     return rep, fm, bindings, tmpl, blocks
+
+
+def check_network_block(blk: dict[str, Any], b: dict[str, Any], bindings: dict[str, Any], where: str, rep: Report) -> None:
+    """Field checks for graph, bundle and parallel blocks (the checks the JSON schema cannot make)."""
+    fields = table_fields(b)
+    if blk["type"] == "parallel":
+        for key in (blk["series"], *blk["axes"]):
+            if key not in fields:
+                rep.err(f"{where}: field {key!r} not in binding {blk['data']!r}")
+        if blk["series"] in blk["axes"]:
+            rep.err(f"{where}: series field {blk['series']!r} cannot also be an axis")
+        for ax in blk.get("lower_is_better", []):
+            if ax not in blk["axes"]:
+                rep.err(f"{where}: lower_is_better names {ax!r}, which is not in axes")
+        return
+    for key in ("source", "target"):
+        if blk[key] not in fields:
+            rep.err(f"{where}: {key} field {blk[key]!r} not in binding {blk['data']!r}")
+    if "nodes" not in blk:
+        return
+    nb = bindings.get(blk["nodes"])
+    if nb is None:
+        rep.err(f"{where}: unknown nodes binding {blk['nodes']!r}")
+        return
+    if nb["type"] != "table":
+        rep.err(f"{where}: nodes needs a table binding; {blk['nodes']!r} is {nb['type']}")
+        return
+    nfields = table_fields(nb)
+    need = ["id", "group"] if blk["type"] == "bundle" else ["id"]
+    for key in need:
+        if key not in nfields:
+            rep.err(f"{where}: nodes binding {blk['nodes']!r} needs a field named {key!r}")
 
 
 def check_template(tmpl: str, offset: int, fm: dict[str, Any], bindings: dict[str, Any], rep: Report) -> None:
@@ -1075,6 +1110,36 @@ def _boxplot_markdown(blk: dict[str, Any], rows: list[dict[str, Any]], esc: Any)
     return "\n".join(out) + "\n"
 
 
+def _network_markdown(blk: dict[str, Any], ctx: dict[str, Any], rows: list[dict[str, Any]], esc: Any) -> str:
+    g = _resolve_graph(blk, ctx, rows)
+    by_id = {n["id"]: n for n in g["nodes"]}
+    grouped = any(n["group"] for n in g["nodes"])
+    out = ["| Source | Group | Target | Group |", "|---|---|---|---|"] if grouped else ["| Source | Target |", "|---|---|"]
+    for ln in g["links"]:
+        s_n, t_n = by_id[ln["source"]], by_id[ln["target"]]
+        cells = [esc(s_n["label"]), esc(t_n["label"])] if not grouped else [esc(s_n["label"]), esc(s_n["group"] or ""), esc(t_n["label"]), esc(t_n["group"] or "")]
+        out.append("| " + " | ".join(cells) + " |")
+    linked = {x for ln in g["links"] for x in (ln["source"], ln["target"])}
+    alone = [n["label"] for n in g["nodes"] if n["id"] not in linked]
+    tail = []
+    if alone:
+        tail.append("Not linked: " + ", ".join(esc(x) for x in alone) + ".")
+    if g["skipped_links"]:
+        tail.append(f"{g['skipped_links']} link(s) not listed: missing end, same node at both ends, or an unknown node.")
+    if g["unresolved_nodes"]:
+        tail.append(f"{g['unresolved_nodes']} node(s) named by a link are not in the node list.")
+    return "\n".join(out) + "\n" + ("\n" + " ".join(tail) + "\n" if tail else "")
+
+
+def _parallel_markdown(blk: dict[str, Any], b: dict[str, Any], rows: list[dict[str, Any]], esc: Any) -> str:
+    pl = _resolve_parallel(blk, b, rows)
+    name = blk["series"].replace("_", " ")
+    heads = [esc(name[:1].upper() + name[1:]), *(esc(a["label"]) + (" (lower is better)" if a["lower_is_better"] else "") for a in pl["axes"])]
+    out = ["| " + " | ".join(heads) + " |", "|---|" + "---:|" * len(pl["axes"])]
+    out += ["| " + " | ".join([esc(sr["label"]), *sr["texts"]]) + " |" for sr in pl["series"]]
+    return "\n".join(out) + "\n"
+
+
 def _chart_num(v: Any, where: str) -> float | None:
     if isinstance(v, Missing):
         return None
@@ -1084,6 +1149,66 @@ def _chart_num(v: Any, where: str) -> float | None:
     if not isinstance(raw, bool | int | float):
         raise SpecError(f"{where}: {raw!r} is not a number")
     return float(raw)  # a boolean charts as 0 or 1; its text stays yes/no
+
+
+def _text(v: Any) -> str | None:
+    """The plain text of a resolved field, or None when it is missing."""
+    if isinstance(v, Missing):
+        return None
+    raw = unwrap(v)
+    return None if raw is None else str(raw)
+
+
+def _resolve_graph(blk: dict[str, Any], ctx: dict[str, Any], rows: Any) -> dict[str, Any]:
+    """graph and bundle: nodes and links as plain strings. Nothing is guessed: a link with a missing end is not drawn and is counted."""
+    vid, bundle = blk["id"], blk["type"] == "bundle"
+    nodes: dict[str, dict[str, Any]] = {}
+    listed = "nodes" in blk
+    if listed and not isinstance(ctx[blk["nodes"]], Missing):
+        for r in ctx[blk["nodes"]]:
+            nid = _text(r["id"])
+            if nid is None:
+                continue
+            if nid in nodes:
+                raise SpecError(f"viz {vid!r}: node id {nid!r} appears more than once in {blk['nodes']!r}")
+            label, group = _text(r["label"]) if "label" in r else None, _text(r["group"]) if "group" in r else None
+            nodes[nid] = {"id": nid, "label": label or nid, "group": group if group is not None else ("(no group)" if bundle else None), "resolved": True}
+    links: list[dict[str, str]] = []
+    skipped = unresolved = 0
+    for r in [] if isinstance(rows, Missing) else rows:
+        s_id, t_id = _text(r[blk["source"]]), _text(r[blk["target"]])
+        if s_id is None or t_id is None or s_id == t_id:
+            skipped += 1
+            continue
+        for nid in (s_id, t_id):
+            if nid not in nodes and not (bundle and listed):
+                nodes[nid] = {"id": nid, "label": nid, "group": None, "resolved": not listed}
+                unresolved += listed
+        if bundle and (s_id not in nodes or t_id not in nodes):
+            skipped += 1
+            continue
+        links.append({"source": s_id, "target": t_id})
+    return {"nodes": list(nodes.values()), "links": links, "directed": bool(blk.get("directed", True)) if not bundle else False,
+            "skipped_links": skipped, "unresolved_nodes": unresolved}
+
+
+def _resolve_parallel(blk: dict[str, Any], b: dict[str, Any], rows: Any) -> dict[str, Any]:
+    vid, flipped = blk["id"], set(blk.get("lower_is_better", []))
+    axes = []
+    for ax in blk["axes"]:
+        spec = b["fields"][ax]
+        opts = spec if isinstance(spec, dict) else {}
+        axes.append({"field": ax, "label": ax.replace("_", " ")[:1].upper() + ax.replace("_", " ")[1:], "lower_is_better": ax in flipped,
+                     "display": opts.get("display"), "precision": opts.get("precision")})
+    series, seen = [], set()
+    for r in [] if isinstance(rows, Missing) else rows:
+        label = _text(r[blk["series"]]) or "(no name)"
+        if label in seen:
+            raise SpecError(f"viz {vid!r}: series {label!r} appears more than once; each row of {blk['data']!r} must be one line")
+        seen.add(label)
+        series.append({"label": label, "values": [_chart_num(r[a], f"{vid} {label} {a}") for a in blk["axes"]],
+                       "texts": [NA if isinstance(r[a], Missing) else str(r[a]) for a in blk["axes"]]})
+    return {"axes": axes, "series": series}
 
 
 def resolve_viz(blk: dict[str, Any], ctx: dict[str, Any], params: dict[str, Any],
@@ -1121,6 +1246,12 @@ def resolve_viz(blk: dict[str, Any], ctx: dict[str, Any], params: dict[str, Any]
         samples = [] if isinstance(data, Missing) else data
         p["samples"] = [{"x": "(no group)" if isinstance(r[blk["x"]], Missing) else str(unwrap(r[blk["x"]])),
                          "y": _chart_num(r[blk["y"]], f"{vid} {blk['y']}")} for r in samples]
+    elif t in ("graph", "bundle"):
+        p["graph"] = _resolve_graph(blk, ctx, data)
+        if t == "bundle":
+            p["options"]["tension"] = blk.get("tension", 0.85)
+    elif t == "parallel":
+        p["parallel"] = _resolve_parallel(blk, b, data)
     else:
         pts = [] if isinstance(data, Missing) else [
             {"label": str(lbl), "value": _chart_num(v, f"{vid} [{lbl}]"), "text": NA if isinstance(v, Missing) else str(v)} for lbl, v in data]
@@ -1153,6 +1284,10 @@ def viz_to_markdown(blk: dict[str, Any], ctx: dict[str, Any], params: dict[str, 
         raise SpecError(f"viz {blk['id']!r}: radar axes mix higher_is_better and lower_is_better (from the bundle)")
     if blk["type"] == "boxplot":
         return head + _boxplot_markdown(blk, data, esc)
+    if blk["type"] in ("graph", "bundle"):
+        return head + _network_markdown(blk, ctx, data, esc)
+    if blk["type"] == "parallel":
+        return head + _parallel_markdown(blk, bindings[blk["data"]], data, esc)
     if blk["type"] in ("radar", "radial", "bar", "line"):
         thr = num(blk.get("threshold"), ctx, params)
         rows = data
